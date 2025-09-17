@@ -69,6 +69,7 @@ $dbConfig = new DatabaseConfig(
     password: $db['password'],
     database: $db['database'],
     charset:  $db['charset'],
+    port:     $db['port'], // ← Nuevo
 );
 
 try {
@@ -84,17 +85,63 @@ try {
 /**
  * 5) Sesión segura (mínimos recomendados)
  */
-$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-    || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+/**
+ * Detecta HTTPS considerando proxies y load balancers
+ */
+function isHttps(): bool {
+    // 1. Detección estándar
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+
+    // 2. Puerto 443 (conexión directa)
+    if (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) {
+        return true;
+    }
+
+    // 3. Headers de proxies comunes
+
+    // X-Forwarded-Proto (Nginx, Apache, AWS ALB)
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+        $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        return true;
+    }
+
+    // X-Forwarded-SSL (algunos proxies)
+    if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) &&
+        $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on') {
+        return true;
+    }
+
+    // Cloudflare
+    if (!empty($_SERVER['HTTP_CF_VISITOR']) &&
+        strpos($_SERVER['HTTP_CF_VISITOR'], '"scheme":"https"') !== false) {
+        return true;
+    }
+
+    // X-Forwarded-Port (algunos load balancers)
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PORT']) &&
+        (int)$_SERVER['HTTP_X_FORWARDED_PORT'] === 443) {
+        return true;
+    }
+
+    return false;
+}
+
+$secure = isHttps();
+
+$domain = $_ENV['APP_DOMAIN'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
+$domain = explode(':', $domain)[0]; // Remover puerto
 
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',
-    'domain'   => '',
+    'domain'   => $domain,
     'secure'   => $secure,
     'httponly' => true,
     'samesite' => 'Lax',
 ]);
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
