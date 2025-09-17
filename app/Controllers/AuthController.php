@@ -36,6 +36,7 @@ class AuthController extends BaseController
         // Aquí validarías contra la base de datos
         // Por ahora, usuario de prueba
         if ($email === 'admin@test.com' && $password === '123456') {
+            session_regenerate_id(true); //xd
             $_SESSION['user_id'] = 1;
             $_SESSION['user_email'] = $email;
             $_SESSION['user_name'] = 'Administrador';
@@ -52,8 +53,38 @@ class AuthController extends BaseController
      */
     public function logout(): void
     {
-        session_destroy();
+
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+
+        if ($requestMethod !== 'POST') {
+            http_response_code(405);
+            header('Allow: POST');
+            exit('Method Not Allowed');
+        }
+
+        $submittedToken = $_POST['csrf_token'] ?? '';
+        $sessionToken = $_SESSION['csrf_token'] ?? null;
+
+        if (!is_string($sessionToken) || $sessionToken === '' ||
+            !is_string($submittedToken) || !hash_equals($sessionToken, $submittedToken)) {
+            http_response_code(400);
+            exit('Invalid CSRF token');
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = [];
+            session_unset();
+            if (ini_get('session.use_cookies')) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+            }
+            session_destroy();
+        }
+
         $this->redirect('/login');
     }
+
+
+
 
 }
