@@ -33,7 +33,7 @@ date_default_timezone_set($_ENV['APP_TZ'] ?? 'UTC');
  *    - Si existe app/config/database.php (retorna un array), úsalo.
  *    - Si no, toma directo de $_ENV.
  */
-$configFile = $rootPath . '/app/config/database.php';
+$configFile = $rootPath . '/app/Config/database.php';
 $db = is_file($configFile)
     ? require $configFile
     : [
