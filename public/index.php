@@ -35,15 +35,29 @@ date_default_timezone_set($_ENV['APP_TZ'] ?? 'UTC');
  */
 $configFile = $rootPath . '/app/Config/database.php';
 $db = is_file($configFile)
-    ? require $configFile
-    : [
+    ? require $configFile : null ;
+    // Validar que el archivo sea array y tenga la claves necesarias
+//Ahora SÍ valida el contenido:
+//Carga el archivo y lo asigna a $db
+//Verifica que sea un array con is_array($db)
+//Verifica que tenga todas las claves necesarias con isset()
+//Si no cumple cualquiera de las dos condiciones, usa el fallback seguro
+//Esto previene errores como "Undefined array key" cuando se intenta acceder a $db['driver'] en la línea del DatabaseConfig.
+if(!is_array($db) || !isset($db['driver'],$db['host'],$db['user'],$db['password'],$db['database'],$db['charset'])) {
+    // Usar fallback si no es válido
+    $db = [
         'driver'   => $_ENV['DB_DRIVER']  ?? 'mysql',
         'host'     => $_ENV['DB_HOST']    ?? 'localhost',
         'user'     => $_ENV['DB_USER']    ?? 'root',
         'password' => $_ENV['DB_PASS']    ?? '',
         'database' => $_ENV['DB_NAME']    ?? '',
         'charset'  => $_ENV['DB_CHARSET'] ?? 'utf8mb4',
+        'port'     => (int)($_ENV['DB_PORT'] ?? 3306),  // ← Nuevo
     ];
+};
+
+
+
 
 /**
  * 4) Construir el DTO de configuración y abrir la conexión PDO (infra)

@@ -8,13 +8,14 @@ final class DatabaseConfig{
         private string $user ,
         private string $password,
         private string $database,
-        private string $charset
+        private string $charset,
+        private int  $port = 3306
     ) {}
 
     public function getDsn(): string
     {
         return sprintf(
-            '%s:host=%s;dbname=%s;charset=%s',
+            '%s:host=%s;port=%ddbname=%s;charset=%s',
             $this->driver,
             $this->host,
             $this->database,
