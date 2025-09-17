@@ -1,6 +1,6 @@
 <?php
 
-namespace Enoc\Login\controllers;
+namespace Enoc\Login\Controllers;
 
 abstract  class BaseController
 {
