@@ -1,12 +1,13 @@
 <?php
-// config/routes.php
+// app/Config/routes.php
 return [
     'GET' => [
-        '/'       => fn() => 'Bienvenido a Home',
-        '/health' => fn() => 'ok',
-        '/login'  => fn() => 'Aquí va la vista de login',
+        '/'         => fn() => 'Bienvenido a Home - <a href="/login">Ir a Login</a>',
+        '/health'   => fn() => 'ok',
+        '/login'    => 'AuthController@showLogin',
+        '/logout'   => 'AuthController@logout',
     ],
     'POST' => [
-        '/login'  => fn() => 'Procesando login',
+        '/login'    => 'AuthController@processLogin',
     ],
 ];

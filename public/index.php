@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+use Enoc\Login\Core\Router;
 use Dotenv\Dotenv;
 use Enoc\Login\Config\DatabaseConfig;
 use Enoc\Login\Core\PdoConnection;
@@ -153,14 +153,24 @@ if (empty($_SESSION['csrf_token'])) {
  * 6) (Temporal) Mini-despacho hasta tener Router real
  *    Aquí solo confirmamos que el bootstrap funcionó.
  */
-$path   = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+try {
+    $router = new Router();
 
-if ($path === '/' && $method === 'GET') {
-    header('Content-Type: text/plain; charset=utf-8');
-    echo "OK: App lista. Conexión a BD establecida.\n";
-    exit;
+    // Cargar rutas desde configuración
+    $router->loadRoutes(__DIR__ . '/../app/Config/routes.php');
+
+    // Procesar petición actual
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+    echo $router->dispatch($requestUri, $requestMethod);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo "Error del servidor: " . htmlspecialchars($e->getMessage());
+
+    // En desarrollo, mostrar stack trace
+    if ($appDebug) { // Usar $appDebug en lugar de $_ENV['APP_ENV']
+        echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    }
 }
-
-http_response_code(404);
-echo 'Not Found';
