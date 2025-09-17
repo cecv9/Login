@@ -15,7 +15,7 @@ final class DatabaseConfig{
     public function getDsn(): string
     {
         return sprintf(
-            '%s:host=%s;port=%d;ddbname=%s;charset=%s',
+            '%s:host=%s;port=%d;dbname=%s;charset=%s',
             $this->driver,
             $this->host,
             $this->port,

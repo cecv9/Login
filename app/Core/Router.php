@@ -4,8 +4,8 @@ namespace Enoc\Login\Core;
 
 class Router
 {
-    private array $routes = [];
-
+                    private array $routes = [];
+                    private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
     /**
      * Cargar rutas desde archivo de configuración
      */
@@ -62,22 +62,22 @@ class Router
      * Ejecutar método de controlador
      */
     private function executeControllerMethod(string $handler): mixed
-    {
-        [$controller, $method] = explode('@', $handler);
-        $controllerClass = "App\\Controllers\\{$controller}";
+{
+    [$controller, $method] = explode('@', $handler);
+    $controllerClass = $this->controllerNamespace . $controller;
 
-        if (!class_exists($controllerClass)) {
-            throw new \Exception("Controlador {$controllerClass} no existe");
-        }
-
-        $instance = new $controllerClass();
-
-        if (!method_exists($instance, $method)) {
-            throw new \Exception("Método {$method} no existe en {$controllerClass}");
-        }
-
-        return $instance->$method();
+    if (!class_exists($controllerClass)) {
+        throw new \Exception("Controlador {$controllerClass} no existe");
     }
+
+    $instance = new $controllerClass();
+
+    if (!method_exists($instance, $method)) {
+        throw new \Exception("Método {$method} no existe en {$controllerClass}");
+    }
+
+    return $instance->$method();
+}
 
     /**
      * Manejar error 404
