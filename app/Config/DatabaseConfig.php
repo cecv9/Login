@@ -18,8 +18,10 @@ final class DatabaseConfig{
             '%s:host=%s;port=%ddbname=%s;charset=%s',
             $this->driver,
             $this->host,
+            $this->port,
             $this->database,
             $this->charset
+
         );
     }
 

@@ -43,7 +43,7 @@ $db = is_file($configFile)
 //Verifica que tenga todas las claves necesarias con isset()
 //Si no cumple cualquiera de las dos condiciones, usa el fallback seguro
 //Esto previene errores como "Undefined array key" cuando se intenta acceder a $db['driver'] en la línea del DatabaseConfig.
-if(!is_array($db) || !isset($db['driver'],$db['host'],$db['user'],$db['password'],$db['database'],$db['charset'])) {
+if(!is_array($db) || !isset($db['driver'],$db['host'],$db['user'],$db['password'],$db['database'],$db['charset'],$db['port'])) {
     // Usar fallback si no es válido
     $db = [
         'driver'   => $_ENV['DB_DRIVER']  ?? 'mysql',
