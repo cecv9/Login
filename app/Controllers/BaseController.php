@@ -68,10 +68,21 @@ abstract  class BaseController
     /**
      * Validar token CSRF (para implementar más adelante)
      */
-    protected function validateCsrf(): bool
+    protected function validateCsrf(?string $submittedToken, ?string $sessionToken = null): bool
     {
-        // Por ahora retorna true, implementaremos CSRF después
-        return true;
+        // Validar token CSRF.
+
+        $sessionToken ??= $_SESSION['csrf_token'] ?? null;
+
+        if (!is_string($sessionToken) || $sessionToken === '') {
+            return false;
+        }
+
+        if (!is_string($submittedToken) || $submittedToken === '') {
+            return false;
+        }
+
+        return hash_equals($sessionToken, $submittedToken);
     }
 
 }

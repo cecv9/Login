@@ -4,8 +4,8 @@ namespace Enoc\Login\Core;
 
 class Router
 {
-                    private array $routes = [];
-                    private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
+   private array $routes = [];
+   private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
     /**
      * Cargar rutas desde archivo de configuración
      */
@@ -26,14 +26,17 @@ class Router
         // Limpiar query parameters y barras adicionales
         $uri = rtrim(parse_url($requestUri, PHP_URL_PATH), '/') ?: '/';
 
-        // Verificar si existe el método HTTP
-        if (!isset($this->routes[$requestMethod])) {
-            return $this->notFound();
-        }
+        $routesForMethod = $this->routes[$requestMethod] ?? null;
 
         // Buscar la ruta exacta
-        if (isset($this->routes[$requestMethod][$uri])) {
-            return $this->executeHandler($this->routes[$requestMethod][$uri]);
+        if (is_array($routesForMethod) && isset($routesForMethod[$uri])) {
+            return $this->executeHandler($routesForMethod[$uri]);
+        }
+
+        $allowedMethods = $this->findAllowedMethods($uri);
+
+        if (!empty($allowedMethods)) {
+            return $this->methodNotAllowed($allowedMethods);
         }
 
         // Si no encuentra la ruta, error 404
@@ -78,6 +81,37 @@ class Router
 
     return $instance->$method();
 }
+
+
+    /**
+     * Manejar error 405 Method Not Allowed
+     */
+    private function methodNotAllowed(array $allowedMethods): string
+    {
+        http_response_code(405);
+        header('Allow: ' . implode(', ', $allowedMethods));
+
+        return '405 Method Not Allowed';
+    }
+
+    /**
+     * Obtener métodos permitidos para un URI
+     */
+    private function findAllowedMethods(string $uri): array
+    {
+        $allowedMethods = [];
+
+        foreach ($this->routes as $method => $routes) {
+            if (isset($routes[$uri])) {
+                $allowedMethods[] = $method;
+            }
+        }
+
+        return $allowedMethods;
+    }
+
+
+
 
     /**
      * Manejar error 404

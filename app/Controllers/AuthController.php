@@ -23,6 +23,12 @@ class AuthController extends BaseController
         // Limpiar errores anteriores
         unset($_SESSION['error']);
 
+        $submittedToken = $_POST['csrf_token'] ?? null;
+        if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
+            http_response_code(400);
+            exit('Invalid CSRF token');
+        }
+
         // Obtener datos del formulario
         $email = $this->getPost('email');
         $password = $this->getPost('password');
@@ -62,11 +68,16 @@ class AuthController extends BaseController
             exit('Method Not Allowed');
         }
 
-        $submittedToken = $_POST['csrf_token'] ?? '';
-        $sessionToken = $_SESSION['csrf_token'] ?? null;
+       // $submittedToken = $_POST['csrf_token'] ?? '';
+       // $sessionToken = $_SESSION['csrf_token'] ?? null;
+        $submittedToken = $_POST['csrf_token'] ?? null;
 
-        if (!is_string($sessionToken) || $sessionToken === '' ||
-            !is_string($submittedToken) || !hash_equals($sessionToken, $submittedToken)) {
+       // if (!is_string($sessionToken) || $sessionToken === '' ||
+         //   !is_string($submittedToken) || !hash_equals($sessionToken, $submittedToken)) {
+           // http_response_code(400);
+            //exit('Invalid CSRF token');
+        //}
+        if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
             http_response_code(400);
             exit('Invalid CSRF token');
         }
