@@ -198,10 +198,17 @@ try {
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo "Error del servidor: " . htmlspecialchars($e->getMessage());
+   // echo "Error del servidor: " . htmlspecialchars($e->getMessage());
 
     // En desarrollo, mostrar stack trace
-    if ($appDebug) { // Usar $appDebug en lugar de $_ENV['APP_ENV']
-        echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    error_log('Unhandled exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+    if ($appDebug) {
+        echo 'Error del servidor: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        echo '<pre>' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES, 'UTF-8') . '</pre>';
+    } else {
+        echo 'Error interno del servidor.';
     }
+
+    exit;
+
 }
