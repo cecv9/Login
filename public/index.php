@@ -156,14 +156,14 @@ if ($detectedHost !== '') {
 
 $domain = $explicitDomainConfigured ? $configuredDomain : $detectedHost;
 
-$cookieParams=([
+$cookieParams=[
     'lifetime' => 0,
     'path'     => '/',
-    'domain'   => $domain,
+ //   'domain'   => $domain,
     'secure'   => $secure,
     'httponly' => true,
     'samesite' => 'Lax',
-]);
+];
 
 if ($domain !== '' && ($explicitDomainConfigured || strpos($domain, '.') !== false)) {
     $cookieParams['domain'] = $domain;
