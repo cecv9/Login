@@ -14,7 +14,7 @@ class DashboardController extends BaseController
         $userEmail = $_SESSION['user_email'] ?? '';
         $csrfToken = $_SESSION['csrf_token'] ?? '';
 
-        return $this->view('dashboard', [
+        return $this->view('auth.dashboard', [
             'title' => 'Dashboard',
             'userName' => $userName,
             'userEmail' => $userEmail,
