@@ -139,10 +139,24 @@ function isHttps(): bool {
 
 $secure = isHttps();
 
-$domain = $_ENV['APP_DOMAIN'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
-$domain = explode(':', $domain)[0]; // Remover puerto
+//$domain = $_ENV['APP_DOMAIN'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
+//$domain = explode(':', $domain)[0]; // Remover puerto
+$configuredDomain = $_ENV['APP_DOMAIN'] ?? null;
+$configuredDomain = is_string($configuredDomain) ? trim($configuredDomain) : '';
+$explicitDomainConfigured = $configuredDomain !== '';
 
-session_set_cookie_params([
+$detectedHost = $_SERVER['HTTP_HOST'] ?? '';
+$detectedHost = is_string($detectedHost) ? trim($detectedHost) : '';
+if ($detectedHost !== '') {
+    $parsedHost = parse_url('//' . $detectedHost, PHP_URL_HOST);
+    if (is_string($parsedHost) && $parsedHost !== '') {
+        $detectedHost = $parsedHost;
+    }
+}
+
+$domain = $explicitDomainConfigured ? $configuredDomain : $detectedHost;
+
+$cookieParams=([
     'lifetime' => 0,
     'path'     => '/',
     'domain'   => $domain,
@@ -150,6 +164,14 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax',
 ]);
+
+if ($domain !== '' && ($explicitDomainConfigured || strpos($domain, '.') !== false)) {
+    $cookieParams['domain'] = $domain;
+}
+
+session_set_cookie_params($cookieParams);
+
+
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
