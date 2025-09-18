@@ -196,7 +196,7 @@ try {
 
     echo $router->dispatch($requestUri, $requestMethod);
 
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     http_response_code(500);
    // echo "Error del servidor: " . htmlspecialchars($e->getMessage());
 
