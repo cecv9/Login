@@ -15,7 +15,25 @@ class Router
             throw new \Exception("Archivo de rutas no encontrado: {$routesFile}");
         }
 
-        $this->routes = require $routesFile;
+        //$this->routes = require $routesFile;
+        $routes = require $routesFile;
+
+        if (!is_array($routes)) {
+            throw new \UnexpectedValueException(
+                'El archivo de rutas debe retornar un arreglo de rutas agrupadas por método.'
+            );
+        }
+
+        foreach ($routes as $method => $routesForMethod) {
+            if (!is_array($routesForMethod)) {
+                $methodName = is_string($method) ? $method : (string) $method;
+                throw new \UnexpectedValueException(
+                    "Las rutas para el método {$methodName} deben estar definidas en un arreglo."
+                );
+            }
+        }
+
+        $this->routes = $routes;
     }
 
     /**
