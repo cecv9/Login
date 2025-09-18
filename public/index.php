@@ -122,7 +122,7 @@ function isHttps(): bool {
             if (($cloudflareData['scheme'] ?? null) === 'https') {
                 return true;
             }
-        } elseif (strpos($cloudflareVisitor, '"scheme":"https"') !== false) {
+        } elseif (preg_match('/"?scheme"?\s*[:=]\s*"?https"?/i', $cloudflareVisitor) === 1) {
             return true;
         }
 

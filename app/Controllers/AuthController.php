@@ -9,9 +9,11 @@ class AuthController extends BaseController
      */
     public function showLogin(): string
     {
+        $error = $_SESSION['error'] ?? null;
+        unset($_SESSION['error']);
         return $this->view('auth.login', [
             'title' => 'Iniciar Sesión',
-            'error' => $_SESSION['error'] ?? null
+            'error' => $error
         ]);
     }
 

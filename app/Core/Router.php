@@ -4,8 +4,20 @@ namespace Enoc\Login\Core;
 
 class Router
 {
-   private array $routes = [];
-   private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
+    private const VALID_HTTP_METHODS = [
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+        'OPTIONS',
+        'HEAD',
+        'CONNECT',
+        'TRACE',
+    ];
+
+    private array $routes = [];
+    private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
     /**
      * Cargar rutas desde archivo de configuración
      */
@@ -24,6 +36,8 @@ class Router
             );
         }
 
+        $normalizedRoutes = [];
+
         foreach ($routes as $method => $routesForMethod) {
             if (!is_array($routesForMethod)) {
                 $methodName = is_string($method) ? $method : (string) $method;
@@ -31,9 +45,18 @@ class Router
                     "Las rutas para el método {$methodName} deben estar definidas en un arreglo."
                 );
             }
+            $normalizedMethod = strtoupper((string) $method);
+
+            if (!in_array($normalizedMethod, self::VALID_HTTP_METHODS, true)) {
+                throw new \UnexpectedValueException(
+                    "Método HTTP inválido: {$method}"
+                );
+            }
+
+            $normalizedRoutes[$normalizedMethod] = $routesForMethod;
         }
 
-        $this->routes = $routes;
+        $this->routes = $normalizedRoutes;
     }
 
     /**
@@ -44,7 +67,8 @@ class Router
         // Limpiar query parameters y barras adicionales
         $uri = rtrim(parse_url($requestUri, PHP_URL_PATH), '/') ?: '/';
 
-        $routesForMethod = $this->routes[$requestMethod] ?? null;
+        $normalizedMethod = strtoupper($requestMethod);
+        $routesForMethod = $this->routes[$normalizedMethod] ?? null;
 
         // Buscar la ruta exacta
         if (is_array($routesForMethod) && isset($routesForMethod[$uri])) {
