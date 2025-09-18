@@ -114,10 +114,12 @@ function isHttps(): bool {
     }
 
     // Cloudflare
+    $cloudflareHttpsScheme = '"scheme":"https"';
     if (!empty($_SERVER['HTTP_CF_VISITOR']) &&
-        strpos($_SERVER['HTTP_CF_VISITOR'], '"scheme":"https"') !== false) {
-        return true;
-    }
+        strpos($_SERVER['HTTP_CF_VISITOR'], $cloudflareHttpsScheme) !== false) {
+            return true;
+        }
+
 
     // X-Forwarded-Port (algunos load balancers)
     if (!empty($_SERVER['HTTP_X_FORWARDED_PORT']) &&
