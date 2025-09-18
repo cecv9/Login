@@ -114,12 +114,19 @@ function isHttps(): bool {
     }
 
     // Cloudflare
-    $cloudflareHttpsScheme = '"scheme":"https"';
-    if (!empty($_SERVER['HTTP_CF_VISITOR']) &&
-        strpos($_SERVER['HTTP_CF_VISITOR'], $cloudflareHttpsScheme) !== false) {
+    if (!empty($_SERVER['HTTP_CF_VISITOR'])) {
+        $cloudflareVisitor = $_SERVER['HTTP_CF_VISITOR'];
+        $cloudflareData = json_decode($cloudflareVisitor, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (($cloudflareData['scheme'] ?? null) === 'https') {
+                return true;
+            }
+        } elseif (strpos($cloudflareVisitor, '"scheme":"https"') !== false) {
             return true;
         }
 
+    }
 
     // X-Forwarded-Port (algunos load balancers)
     if (!empty($_SERVER['HTTP_X_FORWARDED_PORT']) &&
