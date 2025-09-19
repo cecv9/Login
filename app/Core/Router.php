@@ -65,7 +65,16 @@ class Router
     public function dispatch(string $requestUri, string $requestMethod): mixed
     {
         // Limpiar query parameters y barras adicionales
-        $uri = rtrim(parse_url($requestUri, PHP_URL_PATH), '/') ?: '/';
+       // $uri = rtrim(parse_url($requestUri, PHP_URL_PATH), '/') ?: '/';
+
+        $parsedPath = parse_url($requestUri, PHP_URL_PATH);
+
+        if ($parsedPath === false) {
+            return $this->notFound();
+        }
+
+        $path = $parsedPath ?? '';
+        $uri = rtrim($path, '/') ?: '/';
 
         $normalizedMethod = strtoupper($requestMethod);
         $routesForMethod = $this->routes[$normalizedMethod] ?? null;
