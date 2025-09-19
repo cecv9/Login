@@ -53,7 +53,36 @@ class Router
                 );
             }
 
-            $normalizedRoutes[$normalizedMethod] = $routesForMethod;
+            //$normalizedRoutes[$normalizedMethod] = $routesForMethod;
+            $normalizedRoutesForMethod = [];
+
+            foreach ($routesForMethod as $path => $handler) {
+                if (!is_string($path)) {
+                    $pathType = gettype($path);
+                    throw new \UnexpectedValueException(
+                        "Las rutas para el método {$normalizedMethod} deben tener claves de tipo string, {$pathType} recibido."
+                    );
+                }
+
+                if ($path === '' || $path[0] !== '/') {
+                    throw new \UnexpectedValueException(
+                        "Las rutas deben comenzar con '/'. Ruta inválida: {$path}"
+                    );
+                }
+
+                $normalizedPath = rtrim($path, '/') ?: '/';
+
+                if (array_key_exists($normalizedPath, $normalizedRoutesForMethod)) {
+                    throw new \UnexpectedValueException(
+                        "Ruta duplicada detectada para {$normalizedMethod} {$normalizedPath}."
+                    );
+                }
+
+                $normalizedRoutesForMethod[$normalizedPath] = $handler;
+            }
+
+            $normalizedRoutes[$normalizedMethod] = $normalizedRoutesForMethod;
+
         }
 
         $this->routes = $normalizedRoutes;
