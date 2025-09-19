@@ -92,7 +92,7 @@ class Router
     {
         // Si es una closure/función anónima
         if (is_callable($handler)) {
-            return $handler();
+            return \call_user_func($handler);
         }
 
         // Si es string con formato "Controller@method"
