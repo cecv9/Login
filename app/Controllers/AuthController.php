@@ -2,8 +2,15 @@
 
 namespace Enoc\Login\Controllers;
 
-class AuthController extends BaseController
-{
+use Enoc\Login\Core\PdoConnection;
+use Enoc\Login\Repository\UsuarioRepository;
+use Enoc\Login\models\Users;
+
+
+
+class AuthController extends BaseController{
+
+
     /**
      * Mostrar formulario de login
      */
@@ -38,19 +45,26 @@ class AuthController extends BaseController
         // Validaciones básicas
         if (empty($email) || empty($password)) {
             $_SESSION['error'] = 'Email y contraseña son requeridos';
-            return $this->redirect('/login');
+            return $this->redirect('/login');http://localhost/login
         }
 
         // Aquí validarías contra la base de datos
-        // Por ahora, usuario de prueba
-        if ($email === 'admin@test.com' && $password === '123456') {
-            session_regenerate_id(true); //xd
-            $_SESSION['user_id'] = 1;
-            $_SESSION['user_email'] = $email;
+         // Por ahora, usuario de prueba
+       if ($email === 'admin@test.com' && $password === '123456') {
+        session_regenerate_id(true); //xd
+          $_SESSION['user_id'] = 1;
+           $_SESSION['user_email'] = $email;
             $_SESSION['user_name'] = 'Administrador';
 
-            return $this->redirect('/dashboard');
-        }
+             return $this->redirect('/dashboard');
+       }
+        // Intentar buscar el usuario en la base de datos
+
+
+
+
+
+
 
         $_SESSION['error'] = 'Credenciales incorrectas';
         return $this->redirect('/login');
