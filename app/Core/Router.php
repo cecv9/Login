@@ -21,8 +21,8 @@ class Router
     /**
      * Cargar rutas desde archivo de configuración
      */
-    public function loadRoutes(string $routesFile): void
-    {
+    public function loadRoutes(string $routesFile): void {
+
         if (!file_exists($routesFile)) {
             throw new \Exception("Archivo de rutas no encontrado: {$routesFile}");
         }
@@ -88,11 +88,16 @@ class Router
         $this->routes = $normalizedRoutes;
     }
 
+
+
+
+
+
+
     /**
      * Procesar la petición actual
      */
-    public function dispatch(string $requestUri, string $requestMethod): mixed
-    {
+    public function dispatch(string $requestUri, string $requestMethod): mixed {
         // Limpiar query parameters y barras adicionales
        // $uri = rtrim(parse_url($requestUri, PHP_URL_PATH), '/') ?: '/';
 
@@ -126,8 +131,7 @@ class Router
     /**
      * Ejecutar el handler (closure o controlador)
      */
-    private function executeHandler(mixed $handler): mixed
-    {
+    private function executeHandler(mixed $handler): mixed  {
         // Si es una closure/función anónima
         if (is_callable($handler)) {
             return \call_user_func($handler);
@@ -144,8 +148,7 @@ class Router
     /**
      * Ejecutar método de controlador
      */
-    private function executeControllerMethod(string $handler): mixed
-{
+    private function executeControllerMethod(string $handler): mixed {
     [$controller, $method] = explode('@', $handler);
     $controllerClass = $this->controllerNamespace . $controller;
 
@@ -166,8 +169,7 @@ class Router
     /**
      * Manejar error 405 Method Not Allowed
      */
-    private function methodNotAllowed(array $allowedMethods): string
-    {
+    private function methodNotAllowed(array $allowedMethods): string {
         http_response_code(405);
         header('Allow: ' . implode(', ', $allowedMethods));
 
@@ -177,8 +179,7 @@ class Router
     /**
      * Obtener métodos permitidos para un URI
      */
-    private function findAllowedMethods(string $uri): array
-    {
+    private function findAllowedMethods(string $uri): array {
         $allowedMethods = [];
 
         foreach ($this->routes as $method => $routes) {
@@ -196,8 +197,7 @@ class Router
     /**
      * Manejar error 404
      */
-    private function notFound(): string
-    {
+    private function notFound(): string  {
         http_response_code(404);
         return $this->render404();
     }
@@ -205,8 +205,7 @@ class Router
     /**
      * Renderizar página 404 básica
      */
-    private function render404(): string
-    {
+    private function render404(): string  {
         return '
         <!DOCTYPE html>
         <html lang="es">

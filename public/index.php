@@ -29,13 +29,14 @@ if ($appDebug) {
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'UTC');
 
 /**
- * 3) Cargar configuración de BD
+ * 3) Cargar configuración de BDeee
  *    - Si existe app/config/database.php (retorna un array), úsalo.
  *    - Si no, toma directo de $_ENV.
  */
 $configFile = $rootPath . '/app/Config/database.php';
 $db = is_file($configFile)
     ? require $configFile : null ;
+
     // Validar que el archivo sea array y tenga la claves necesarias
 //Ahora SÍ valida el contenido:
 //Carga el archivo y lo asigna a $db
@@ -43,6 +44,7 @@ $db = is_file($configFile)
 //Verifica que tenga todas las claves necesarias con isset()
 //Si no cumple cualquiera de las dos condiciones, usa el fallback seguro
 //Esto previene errores como "Undefined array key" cuando se intenta acceder a $db['driver'] en la línea del DatabaseConfig.
+
 if(!is_array($db) || !isset($db['driver'],$db['host'],$db['user'],$db['password'],$db['database'],$db['charset'],$db['port'])) {
     // Usar fallback si no es válido
     $db = [

@@ -9,13 +9,13 @@
 <body>
 <div class="login-container">
     <form class="login-form" method="POST" action="/login">
-        <h1><?= htmlspecialchars($title) ?></h1>
+        <h1><?= htmlspecialchars($title ?? 'Login') ?></h1>
 
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 
 
-        <?php if (isset($error)): ?>
+        <?php if (isset($error) && $error !== '') : ?>
             <div class="error">
                 <?= htmlspecialchars($error) ?>
             </div>
