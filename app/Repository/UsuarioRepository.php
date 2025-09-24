@@ -53,7 +53,8 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt = $this->pdo->prepare('SELECT id, email,  password_hash FROM users WHERE id = :id');
             $stmt->execute(['id' => $id]);
             $stmt->setFetchMode(PDO::FETCH_CLASS, Users::class);
-            return $stmt->fetch();
+            $user = $stmt->fetch();
+            return $user === false ? null : $user;
         } catch (PDOException $e) {
             error_log('Error al buscar usuario por ID: ' . $e->getMessage());
             return null;
@@ -73,7 +74,8 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt = $this->pdo->prepare('SELECT id, email,  password_hash FROM users WHERE email = :email');
             $stmt->execute(['email' => $email]);
             $stmt->setFetchMode(PDO::FETCH_CLASS, Users::class);
-            return $stmt->fetch();
+            $user = $stmt->fetch();
+            return $user === false ? null : $user;
         } catch (PDOException $e) {
             error_log('Error al buscar usuario por email: ' . $e->getMessage());
             return null;

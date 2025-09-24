@@ -74,16 +74,17 @@ class AuthController extends BaseController{
         $user = $this->repository->findByEmail($email);
         // var_dump($email, $user ? $user->getPassword() : 'User null'); // Debug
         if (!$user || !password_verify($password, $user->getPassword())) {
-            $_SESSION['error'] = 'Credenciales incorrectas';
+            $_SESSION['error'] = 'Credenciales incorrectas xd';
             return $this->redirect('/login');
+        }else{
+            // Login exitoso: Regenerar sesión y guardar datos
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $user->getId();
+            $_SESSION['user_email'] = $user->getEmail();
+// $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
+            return $this->redirect('/dashboard');
         }
 
-        // Login exitoso: Regenerar sesión y guardar datos
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = $user->getId();
-        $_SESSION['user_email'] = $user->getEmail();
-// $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
-        return $this->redirect('/dashboard');
 
 
 
@@ -92,8 +93,8 @@ class AuthController extends BaseController{
 
 
 
-        $_SESSION['error'] = 'Credenciales incorrectas';
-        return $this->redirect('/login');
+
+
     }
 
     /**
