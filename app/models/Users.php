@@ -6,7 +6,7 @@ class Users {
 
     private int $id = 0;
     private string $email = "";
-    private string $password = "";
+    private string $password_hash = "";
 
     public function __construct() {}
 
@@ -40,10 +40,10 @@ class Users {
     }
 
     public function getPassword(): string {
-        return $this->password;
+        return $this->password_hash;
     }
 
     public function setPassword(string $password): void {
-        $this->password = $password;
+        $this->password_hash = $password;
     }
 }

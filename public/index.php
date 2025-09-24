@@ -187,7 +187,7 @@ if (empty($_SESSION['csrf_token'])) {
  *    Aquí solo confirmamos que el bootstrap funcionó.
  */
 try {
-    $router = new Router();
+    $router = new Router($connection);
 
     // Cargar rutas desde configuración
     $router->loadRoutes(__DIR__ . '/../app/Config/routes.php');

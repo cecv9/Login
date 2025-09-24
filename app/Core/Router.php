@@ -2,6 +2,8 @@
 
 namespace Enoc\Login\Core;
 
+use Enoc\Login\Core\PdoConnection;
+
 class Router
 {
     private const VALID_HTTP_METHODS = [
@@ -18,6 +20,12 @@ class Router
 
     private array $routes = [];
     private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
+    private PdoConnection $pdoConnection;
+
+    public function __construct(PdoConnection $pdoConnection) {
+        $this->pdoConnection = $pdoConnection;
+    }
+
     /**
      * Cargar rutas desde archivo de configuración
      */
@@ -156,7 +164,7 @@ class Router
         throw new \Exception("Controlador {$controllerClass} no existe");
     }
 
-    $instance = new $controllerClass();
+    $instance = new $controllerClass($this->pdoConnection);
 
     if (!method_exists($instance, $method)) {
         throw new \Exception("Método {$method} no existe en {$controllerClass}");

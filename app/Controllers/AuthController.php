@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Enoc\Login\Controllers;
 
 use Enoc\Login\Core\PdoConnection;
@@ -9,6 +11,13 @@ use Enoc\Login\models\Users;
 
 
 class AuthController extends BaseController{
+
+    private UsuarioRepository $repository;
+
+    public function __construct (PdoConnection $pdoConnection){
+        $this->repository = new UsuarioRepository($pdoConnection);
+
+    }
 
 
     /**
@@ -45,20 +54,37 @@ class AuthController extends BaseController{
         // Validaciones básicas
         if (empty($email) || empty($password)) {
             $_SESSION['error'] = 'Email y contraseña son requeridos';
-            return $this->redirect('/login');http://localhost/login
+            return $this->redirect('/login'); //http://localhost/login
         }
 
         // Aquí validarías contra la base de datos
          // Por ahora, usuario de prueba
-       if ($email === 'admin@test.com' && $password === '123456') {
-        session_regenerate_id(true); //xd
-          $_SESSION['user_id'] = 1;
-           $_SESSION['user_email'] = $email;
-            $_SESSION['user_name'] = 'Administrador';
+       //if ($email === 'admin@test.com' && $password === '123456') {
+        //session_regenerate_id(true); //xd
+          //$_SESSION['user_id'] = 1;
+           //$_SESSION['user_email'] = $email;
+            //$_SESSION['user_name'] = 'Administrador';
 
-             return $this->redirect('/dashboard');
-       }
-        // Intentar buscar el usuario en la base de datos
+             //return $this->redirect('/dashboard');
+       //}
+        // logica
+        // Lógica real: Buscar usuario en BD
+        // Lógica real: Buscar usuario en BD
+        $email=trim(strtolower($email));
+        $user = $this->repository->findByEmail($email);
+        // var_dump($email, $user ? $user->getPassword() : 'User null'); // Debug
+        if (!$user || !password_verify($password, $user->getPassword())) {
+            $_SESSION['error'] = 'Credenciales incorrectas';
+            return $this->redirect('/login');
+        }
+
+        // Login exitoso: Regenerar sesión y guardar datos
+        session_regenerate_id(true);
+        $_SESSION['user_id'] = $user->getId();
+        $_SESSION['user_email'] = $user->getEmail();
+// $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
+        return $this->redirect('/dashboard');
+
 
 
 
