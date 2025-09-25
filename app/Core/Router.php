@@ -22,6 +22,8 @@ class Router
     private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
     private PdoConnection $pdoConnection;
 
+    private array $protectedRoutes = [];  // ← NUEVO: Array de rutas que requieren auth (e.g., ['/dashboard'])
+
     public function __construct(PdoConnection $pdoConnection) {
         $this->pdoConnection = $pdoConnection;
     }
@@ -97,7 +99,10 @@ class Router
     }
 
 
-
+// NUEVO: Método para marcar rutas como protegidas (llamar en loadRoutes o constructor)
+    public function protectRoute(string $path): void {
+        $this->protectedRoutes[] = rtrim($path, '/') ?: '/';
+    }
 
 
 
@@ -120,6 +125,13 @@ class Router
 
         $normalizedMethod = strtoupper($requestMethod);
         $routesForMethod = $this->routes[$normalizedMethod] ?? null;
+
+        // ← NUEVO: Middleware de auth - Chequea si ruta protegida
+        if (in_array($uri, $this->protectedRoutes, true) && empty($_SESSION['user_id'])) {
+            // No logueado: Redirect a login
+            header('Location: /login');
+            exit('Redirecting to login...');
+        }
 
         // Buscar la ruta exacta
         if (is_array($routesForMethod) && isset($routesForMethod[$uri])) {

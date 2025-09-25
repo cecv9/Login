@@ -31,7 +31,9 @@
             <input type="password" id="password" name="password" required>
         </div>
 
+
         <button type="submit">Iniciar Sesión</button>
+        <p>¿Ya tienes cuenta? <a href="/register">Registrarse</a></p>
     </form>
 </div>
 </body>

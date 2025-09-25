@@ -203,6 +203,76 @@ class AuthController extends BaseController{
     }
 
 
+    /**
+     * Mostrar formulario de registro
+     */
+    public function showRegister(): string
+    {
+        $error = $_SESSION['register_error'] ?? null;
+        unset($_SESSION['register_error']);
+        $success = $_SESSION['register_success'] ?? null;
+        unset($_SESSION['register_success']);
+
+        return $this->view('auth.register', [
+            'title' => 'Registro de Usuario',
+            'error' => $error,
+            'success' => $success,
+            'csrfToken' => $_SESSION['csrf_token'] ?? ''  // Pasa CSRF
+        ]);
+    }
+
+    /**
+     * Procesar registro
+     */
+    public function processRegister(): string
+    {
+        unset($_SESSION['register_error'], $_SESSION['register_success']);
+
+        // Validar CSRF
+        $submittedToken = $_POST['csrf_token'] ?? null;
+        if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
+            http_response_code(400);
+            exit('Invalid CSRF token');
+        }
+
+        // Obtener y sanitizar datos
+        $name = trim($this->getPost('name', ''));
+        $email = trim(strtolower($this->getPost('email', '')));
+        $password = $this->getPost('password', '');
+        $confirmPassword = $this->getPost('confirm_password', '');
+
+        // Validaciones (SRP: Controller valida input)
+        $errors = [];
+        if (empty($name) || strlen($name) < 2) {
+            $errors[] = 'Nombre requerido (mín. 2 chars)';
+        }
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Email válido requerido';
+        }
+        if (empty($password) || strlen($password) < 6) {
+            $errors[] = 'Contraseña mínima 6 chars';
+        }
+        if ($password !== $confirmPassword) {
+            $errors[] = 'Contraseñas no coinciden';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['register_error'] = implode('<br>', $errors);
+            return $this->redirect('/register');
+        }
+
+        // Insert via repo
+        $userId = $this->repository->createUser($email, $password, $name);
+        if ($userId) {
+            $_SESSION['register_success'] = 'Usuario creado exitosamente. <a href="/login">Inicia sesión</a>';
+            return $this->redirect('/register');  // O directo a login
+        } else {
+            $_SESSION['register_error'] = 'Error al crear usuario (email ya existe?).';
+            return $this->redirect('/register');
+        }
+    }
+
+
 
 
 }

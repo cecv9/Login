@@ -5,10 +5,12 @@ return [
         '/health'   => fn() => 'ok',
         '/login'    => 'AuthController@showLogin',
         '/dashboard' => 'DashboardController@show',
+        '/register' => 'AuthController@showRegister',
     ],
     'POST' => [
         '/login'    => 'AuthController@processLogin',
         '/logout'   => 'AuthController@logout',
+        '/register' => 'AuthController@processRegister',
     ],
 
 ];

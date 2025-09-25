@@ -192,6 +192,9 @@ try {
     // Cargar rutas desde configuración
     $router->loadRoutes(__DIR__ . '/../app/Config/routes.php');
 
+    // ← NUEVO: Marca rutas protegidas (agrega las que quieras)
+    $router->protectRoute('/dashboard');  // Solo /dashboard requiere auth por ahora
+
     // Procesar petición actual
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
     $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
