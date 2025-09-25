@@ -27,7 +27,7 @@
         </div>
 
         <div class="form-group">
-            <label for="password">Contraseña:</label>
+            <label for="password">Contrasenia:</label>
             <input type="password" id="password" name="password" required>
         </div>
 

@@ -49,7 +49,9 @@ class AuthController extends BaseController{
 
         // Obtener datos del formulario
         $email = $this->getPost('email');
+        $email=trim(strtolower($email));
         $password = $this->getPost('password');
+        $password = trim($password);  // ← FIX: Elimina espacios leading/trailing
 
         // Validaciones básicas
         if (empty($email) || empty($password)) {
@@ -67,11 +69,73 @@ class AuthController extends BaseController{
 
              //return $this->redirect('/dashboard');
        //}
-        // logica
+
         // Lógica real: Buscar usuario en BD
-        // Lógica real: Buscar usuario en BD
-        $email=trim(strtolower($email));
+
+
         $user = $this->repository->findByEmail($email);
+
+// DEBUG TEMPORAL - QUITAR EN PROD
+        // DEBUG TEMPORAL - QUITAR EN PROD
+        //if ($user) {
+            //$fetchedHash = $user->getPassword();
+            //$verifyResult = password_verify($password, $fetchedHash);
+            //echo "<pre style='background: #f0f0f0; padding: 10px; border:1px solid #ccc;'>";
+            //echo "DEBUG LOGIN:\n";
+            //echo "- Email buscado: $email\n";
+            //echo "- ID: " . $user->getId() . "\n";
+            //echo "- Email fetched: " . $user->getEmail() . "\n";
+            //echo "- Hash fetched (length): " . strlen($fetchedHash) . " chars\n";
+            //echo "- Hash preview: " . substr($fetchedHash, 0, 20) . "...\n";
+            //echo "- Password input EXACT (length): '" . addslashes($password) . "' (" . strlen($password) . " chars)\n";  // ← NUEVO: Muestra full con escapes
+            //echo "- Verify result: " . ($verifyResult ? 'TRUE ✅' : 'FALSE ❌') . "\n";
+           // echo "</pre>";
+           // exit;
+      //  } else {
+         //   echo "<pre>DEBUG: User null</pre>";
+           // exit;
+       // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // var_dump($email, $user ? $user->getPassword() : 'User null'); // Debug
         if (!$user || !password_verify($password, $user->getPassword())) {
             $_SESSION['error'] = 'Credenciales incorrectas xd';
@@ -81,7 +145,7 @@ class AuthController extends BaseController{
             session_regenerate_id(true);
             $_SESSION['user_id'] = $user->getId();
             $_SESSION['user_email'] = $user->getEmail();
-// $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
+            $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
             return $this->redirect('/dashboard');
         }
 

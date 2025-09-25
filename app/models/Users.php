@@ -7,6 +7,7 @@ class Users {
     private int $id = 0;
     private string $email = "";
     private string $password_hash = "";
+    private string $name = "";  // ← NUEVO: Campo para nombre
 
     public function __construct() {}
 
@@ -45,5 +46,14 @@ class Users {
 
     public function setPassword(string $password): void {
         $this->password_hash = $password;
+    }
+
+    // ← NUEVOS: Getter y setter para name
+    public function getName(): string {
+        return $this->name;
+    }
+
+    public function setName(string $name): void {
+        $this->name = $name;
     }
 }
