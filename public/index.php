@@ -194,6 +194,8 @@ try {
 
     // ← NUEVO: Marca rutas protegidas (agrega las que quieras)
     $router->protectRoute('/dashboard');  // Solo /dashboard requiere auth por ahora
+    $router->protectRoute('/admin/users/index.php', 'admin');  // /admin requiere rol admin
+
 
     // Procesar petición actual
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';

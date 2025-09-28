@@ -143,9 +143,11 @@ class AuthController extends BaseController{
         }else{
             // Login exitoso: Regenerar sesión y guardar datos
             session_regenerate_id(true);
+
             $_SESSION['user_id'] = $user->getId();
             $_SESSION['user_email'] = $user->getEmail();
             $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
+            $_SESSION['user_role'] = $user->getRole();  // ← NUEVO: Guarda rol en sesión
             return $this->redirect('/dashboard');
         }
 

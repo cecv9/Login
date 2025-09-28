@@ -23,13 +23,13 @@ abstract  class BaseController
         $sanitizedData = [];
         foreach ($data as $key => $value) {
             if ($value === null) {
-                $sanitizedData[$key] = null;  // ¡FIX: Preserva null para isset() correcto
+                $sanitizedData[$key] = null;  // Preserva null
             } elseif (is_string($value)) {
-                $sanitizedData[$key] = htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');  // Auto-escape strings (opcional, anti-XSS)
-            } elseif (!is_scalar($value)) {
-                $sanitizedData[$key] = (string) $value;  // Castea arrays/objects a string (e.g., "Array" si es array)
+                $sanitizedData[$key] = htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');  // Escape strings
+            } elseif (is_array($value) || is_object($value)) {
+                $sanitizedData[$key] = $value;  // ← FIX: NO castees arrays/objects – presérvalos para loops/getters
             } else {
-                $sanitizedData[$key] = $value;  // Scalars intactos (int, bool, float)
+                $sanitizedData[$key] = $value;  // Scalars intactos
             }
         }
 
@@ -122,5 +122,16 @@ abstract  class BaseController
 
         return hash_equals($sessionToken, $submittedToken);
     }
+
+    // ← NUEVO: Helper para generar token fresco (llama en show* methods)
+    protected function generateCsrfToken(): string {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        $_SESSION['csrf_token_time'] = time();  // Reset expiración si usas
+        return $_SESSION['csrf_token'];
+    }
+
+
 
 }

@@ -9,6 +9,8 @@ class Users {
     private string $password_hash = "";
     private string $name = "";  // ← NUEVO: Campo para nombre
 
+    private string $role = 'user'; // ← NUEVO: Campo para rol
+
     public function __construct() {}
 
     public function set(string $name, $value): void {
@@ -55,5 +57,12 @@ class Users {
 
     public function setName(string $name): void {
         $this->name = $name;
+    }
+
+    public function getRole(): string {
+        return $this->role;
+    }
+    public function setRole(string $role): void {
+        $this->role = $role;
     }
 }
