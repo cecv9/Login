@@ -1,10 +1,10 @@
-# 🔐 Login MVC - Sistema de Autenticación
+# 🔐 Login MVC - Sistema de Autenticación PHP
 
-![PHP Version](https://img.shields.io/badge/PHP-%3E%3D7.4-blue)
+![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
-Un sistema de login robusto y seguro implementado con el patrón MVC (Modelo-Vista-Controlador) en PHP puro, diseñado siguiendo las mejores prácticas de desarrollo.
+Sistema de login profesional implementado con arquitectura MVC en PHP puro, utilizando PDO, autoloader PSR-4 y patrón Repository. Diseñado con las mejores prácticas de seguridad y desarrollo moderno.
 
 ## 📋 Tabla de Contenidos
 
@@ -14,7 +14,6 @@ Un sistema de login robusto y seguro implementado con el patrón MVC (Modelo-Vis
 - [Configuración](#-configuración)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Uso](#-uso)
-- [API Endpoints](#-api-endpoints)
 - [Seguridad](#-seguridad)
 - [Testing](#-testing)
 - [Contribuir](#-contribuir)
@@ -22,26 +21,29 @@ Un sistema de login robusto y seguro implementado con el patrón MVC (Modelo-Vis
 
 ## ✨ Características
 
-- 🏗️ **Arquitectura MVC**: Separación clara de responsabilidades
-- 🔒 **Autenticación Segura**: Hash de contraseñas con bcrypt
-- 🎯 **Autoloader PSR-4**: Carga automática de clases
-- 🌐 **URLs Amigables**: Sistema de enrutamiento personalizado
-- 📱 **Responsive Design**: Interfaz adaptable a dispositivos móviles
-- 🔧 **Variables de Entorno**: Configuración mediante .env
-- 🧪 **Testing Ready**: Estructura preparada para pruebas
-- 📝 **Validación de Datos**: Validación tanto client-side como server-side
+- 🏗️ **Arquitectura MVC Limpia**: Separación total de responsabilidades
+- 🔒 **Autenticación Robusta**: Sistema de login/registro seguro
+- 📦 **Autoloader PSR-4**: Namespace `Enoc\Login\`
+- 🌐 **Router Personalizado**: Sistema de rutas avanzado con protección
+- 🛡️ **Middleware de Autenticación**: Protección de rutas por roles
+- 🔧 **Variables de Entorno**: Configuración via `.env` con phpdotenv
+- 💾 **Patrón Repository**: Abstracción de acceso a datos
+- 🎯 **Traits Reutilizables**: Código modular y reutilizable
+- 🔐 **Sesiones Seguras**: Detección HTTPS automática y cookies seguras
+- 🛡️ **Protección CSRF**: Tokens anti-CSRF integrados
 
 ## 🛠️ Requisitos
 
-- PHP >= 7.4
+- PHP >= 8.0 (declaración strict types)
 - MySQL >= 5.7 o MariaDB >= 10.2
 - Composer
-- Servidor web (Apache/Nginx)
+- Servidor web (Apache/Nginx) con mod_rewrite
 - Extensiones PHP:
   - PDO
   - PDO_MySQL
   - mbstring
   - openssl
+  - json
 
 ## 📦 Instalación
 
@@ -58,245 +60,200 @@ Un sistema de login robusto y seguro implementado con el patrón MVC (Modelo-Vis
 
 3. **Configurar el servidor web**
    
-   **Apache (.htaccess ya incluido):**
-   ```apache
-   DocumentRoot /ruta/al/proyecto/public
-   ```
+   **Punto de entrada**: `public/index.php`
    
-   **Nginx:**
-   ```nginx
-   server {
-       listen 80;
-       server_name tu-dominio.com;
-       root /ruta/al/proyecto/public;
-       index index.php;
-       
-       location / {
-           try_files $uri $uri/ /index.php?$query_string;
-       }
-       
-       location ~ \.php$ {
-           fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
-           fastcgi_index index.php;
-           fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-           include fastcgi_params;
-       }
-   }
+   **Apache (DocumentRoot apuntando a /public):**
+   ```apache
+   <VirtualHost *:80>
+       DocumentRoot /ruta/al/proyecto/public
+       ServerName tu-dominio.local
+   </VirtualHost>
    ```
 
-4. **Configurar la base de datos**
+4. **Crear la base de datos**
    ```sql
-   CREATE DATABASE login_mvc;
-   USE login_mvc;
-   
-   CREATE TABLE users (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       username VARCHAR(50) UNIQUE NOT NULL,
-       email VARCHAR(100) UNIQUE NOT NULL,
-       password VARCHAR(255) NOT NULL,
-       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-   );
+   CREATE DATABASE login_mvc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 
 ## ⚙️ Configuración
 
-1. **Crear archivo de configuración**
+1. **Crear archivo de entorno**
    ```bash
    cp .env.example .env
    ```
 
-2. **Configurar variables de entorno (.env)**
+2. **Configurar variables (.env)**
    ```env
    # Base de datos
+   DB_DRIVER=mysql
    DB_HOST=localhost
-   DB_NAME=login_mvc
    DB_USER=tu_usuario
    DB_PASS=tu_contraseña
+   DB_NAME=login_mvc
+   DB_CHARSET=utf8mb4
    DB_PORT=3306
    
    # Aplicación
-   APP_NAME="Login MVC"
-   APP_URL=http://localhost
-   APP_ENV=development
-   
-   # Seguridad
-   APP_KEY=tu_clave_secreta_aqui
-   SESSION_LIFETIME=120
+   APP_DEBUG=true
+   APP_TZ=America/El_Salvador
+   APP_DOMAIN=localhost
    ```
 
-## 📁 Estructura del Proyecto
+## 📁 Estructura del Proyecto Real
 
 ```
 Login/
 ├── 📁 app/
-│   ├── 📁 Config/          # Configuraciones de la aplicación
+│   ├── 📁 Config/          # Configuraciones y rutas
+│   │   ├── database.php    # Config BD (opcional)
+│   │   └── routes.php      # Definición de rutas
 │   ├── 📁 Controllers/     # Controladores MVC
 │   ├── 📁 Core/           # Núcleo del framework
-│   ├── 📁 Models/         # Modelos de datos
-│   ├── 📁 Repository/     # Patrón Repository
+│   │   ├── Router.php     # Sistema de enrutamiento
+│   │   ├── PdoConnection.php
+│   │   └── DatabaseConnectionException.php
+│   ├── 📁 models/         # Modelos de datos (lowercase)
+│   ├── 📁 Repository/     # Patrón Repository para datos
 │   └── 📁 Traits/         # Traits reutilizables
 ├── 📁 public/             # Punto de entrada público
 │   ├── 📁 css/           # Hojas de estilo
-│   ├── 📁 js/            # Scripts JavaScript
-│   └── index.php         # Front controller
+│   ├── .htaccess         # Reescritura de URLs
+│   └── index.php         # Front controller principal
 ├── 📁 views/              # Vistas/Templates
-│   ├── 📁 auth/          # Vistas de autenticación
-│   ├── 📁 layouts/       # Layouts base
-│   └── 📁 partials/      # Componentes reutilizables
-├── 📁 test/               # Pruebas unitarias
-├── 📁 vendor/             # Dependencias de Composer
+├── 📁 test/               # Pruebas
+├── 📁 vendor/             # Dependencias Composer
 ├── .env                   # Variables de entorno
-├── .gitignore            # Archivos ignorados por Git
-├── .htaccess             # Configuración Apache
-├── composer.json         # Dependencias PHP
-└── README.md             # Documentación
+├── composer.json          # Configuración Composer
+└── composer.lock          # Dependencias bloqueadas
 ```
 
-## 🚀 Uso
+## 🚀 Cómo Funciona
 
-### Registro de Usuario
+### Front Controller (public/index.php)
+
+El archivo principal realiza la siguiente secuencia:
+
+1. **Carga autoloader** de Composer
+2. **Carga variables .env** con `phpdotenv`
+3. **Configura modo debug** y timezone
+4. **Establece conexión BD** via `PdoConnection`
+5. **Configura sesiones seguras** con detección HTTPS
+6. **Genera tokens CSRF** automáticamente
+7. **Inicializa Router** y carga rutas
+8. **Procesa la petición** actual
+
+### Sistema de Rutas
 
 ```php
-// Ejemplo de uso del controlador
-$userController = new \Enoc\Login\Controllers\UserController();
-$result = $userController->register([
-    'username' => 'nuevo_usuario',
-    'email' => 'usuario@email.com',
-    'password' => 'contraseña_segura'
-]);
+// En app/Config/routes.php
+$router->get('/', 'HomeController@index');
+$router->post('/login', 'AuthController@login');
+$router->get('/dashboard', 'DashboardController@index');
+
+// Rutas protegidas por autenticación
+$router->protectRoute('/dashboard');
+
+// Rutas protegidas por rol admin
+$router->protectRoute('/admin/users/index.php', 'admin');
 ```
 
-### Iniciar Sesión
+### Namespace y Autoloading
 
 ```php
-$result = $userController->login([
-    'username' => 'nuevo_usuario',
-    'password' => 'contraseña_segura'
-]);
+// Todas las clases usan el namespace base
+namespace Enoc\Login\Controllers;
+namespace Enoc\Login\Core;
+namespace Enoc\Login\Repository;
+
+// Autoload PSR-4 configurado en composer.json:
+"autoload": {
+    "psr-4": {
+        "Enoc\\Login\\": "app/"
+    }
+}
+```
+
+## 🔒 Seguridad Implementada
+
+### Conexión Segura a BD
+- **PDO con prepared statements**
+- **Configuración centralizada** via `DatabaseConfig`
+- **Manejo de excepciones** específicas
+
+### Sesiones Avanzadas
+- **Detección HTTPS** automática (proxies, Cloudflare, etc.)
+- **Cookies seguras** con SameSite=Lax
+- **Detección de dominio** automática
+- **Configuración adaptativa** según entorno
+
+### Protección CSRF
+```php
+// Token generado automáticamente en cada sesión
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 ```
 
 ### Middleware de Autenticación
-
-```php
-// Proteger rutas que requieren autenticación
-if (!AuthMiddleware::check()) {
-    header('Location: /login');
-    exit;
-}
-```
-
-## 🌐 API Endpoints
-
-| Método | Endpoint | Descripción | Parámetros |
-|--------|----------|-------------|------------|
-| `GET` | `/` | Página principal | - |
-| `GET` | `/login` | Formulario de login | - |
-| `POST` | `/login` | Procesar login | `username`, `password` |
-| `GET` | `/register` | Formulario de registro | - |
-| `POST` | `/register` | Procesar registro | `username`, `email`, `password` |
-| `GET` | `/dashboard` | Panel de usuario | - |
-| `POST` | `/logout` | Cerrar sesión | - |
-
-## 🔒 Seguridad
-
-### Medidas Implementadas
-
-- **Hash de Contraseñas**: Uso de `password_hash()` con `PASSWORD_DEFAULT`
-- **Prevención SQL Injection**: Prepared statements con PDO
-- **Validación de Entrada**: Sanitización y validación de todos los inputs
-- **Protección CSRF**: Tokens CSRF en formularios
-- **Sesiones Seguras**: Configuración segura de sesiones PHP
-- **Headers de Seguridad**: Content Security Policy, X-Frame-Options, etc.
-
-### Ejemplo de Validación
-
-```php
-class Validator
-{
-    public static function validateEmail($email): bool
-    {
-        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-    }
-    
-    public static function validatePassword($password): bool
-    {
-        return strlen($password) >= 8 && 
-               preg_match('/[A-Za-z]/', $password) &&
-               preg_match('/[0-9]/', $password);
-    }
-}
-```
+- **Protección por rutas**
+- **Roles de usuario** (user, admin)
+- **Redirección automática** a login
 
 ## 🧪 Testing
 
-Ejecutar las pruebas:
+El directorio `test/` está preparado para:
+- Pruebas unitarias de controladores
+- Pruebas de integración de Repository
+- Testing del sistema de rutas
 
-```bash
-# Pruebas unitarias
-composer test
+## 📝 Ejemplo de Uso
 
-# Cobertura de código
-composer test:coverage
+### Definir nueva ruta
+```php
+// En app/Config/routes.php
+$router->get('/perfil', 'UserController@profile');
+$router->protectRoute('/perfil'); // Requiere login
 ```
 
-Estructura de pruebas:
+### Crear controlador
+```php
+<?php
+namespace Enoc\Login\Controllers;
+
+class UserController 
+{
+    public function profile() 
+    {
+        // Lógica del controlador
+        return view('user/profile');
+    }
+}
 ```
-test/
-├── Unit/
-│   ├── Controllers/
-│   ├── Models/
-│   └── Core/
-└── Integration/
-    └── Auth/
-```
+
+## 🔧 Dependencias
+
+Según `composer.json`:
+- **vlucas/phpdotenv**: ^5.6 - Manejo de variables de entorno
 
 ## 🤝 Contribuir
 
-1. **Fork** el proyecto
-2. **Crear** una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. **Commit** tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** a la rama (`git push origin feature/AmazingFeature`)
-5. **Abrir** un Pull Request
+1. Fork del proyecto
+2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
 
-### Estándares de Código
-
-- Seguir PSR-12 para el estilo de código
-- Documentar todas las funciones públicas
-- Escribir pruebas para nuevas funcionalidades
-- Mantener la cobertura de pruebas > 80%
-
-## 📸 Screenshots
-
-### Login Form
-![Login](https://via.placeholder.com/600x400/2563eb/ffffff?text=Login+Form)
-
-### Dashboard
-![Dashboard](https://via.placeholder.com/600x400/059669/ffffff?text=User+Dashboard)
-
-## 🚀 Roadmap
-
-- [ ] Implementar autenticación con redes sociales
-- [ ] Añadir sistema de roles y permisos
-- [ ] Implementar recuperación de contraseña por email
-- [ ] Agregar autenticación de dos factores (2FA)
-- [ ] API REST completa
-- [ ] Documentación con Swagger
+### Estándares
+- **PHP 8.0+** con `declare(strict_types=1)`
+- **PSR-4** para autoloading
+- **Namespaces** bajo `Enoc\Login\`
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+Proyecto bajo Licencia MIT.
 
 ## 👨‍💻 Autor
 
-**Enoc** - [@cecv9](https://github.com/cecv9)
-
-## 🙏 Agradecimientos
-
-- Inspirado en las mejores prácticas de desarrollo PHP
-- Comunidad de desarrolladores de PHP
-- Contribuidores del proyecto
+**Enoc Castillo** - [@cecv9](https://github.com/cecv9)
 
 ---
 
-⭐ **¡Si te gusta este proyecto, no olvides darle una estrella!** ⭐
+⭐ **¡Dale una estrella si te ha sido útil!** ⭐
