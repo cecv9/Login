@@ -102,30 +102,21 @@ class AuthController extends BaseController{
 
 
         // var_dump($email, $user ? $user->getPassword() : 'User null'); // Debug
+
         if (!$user || !password_verify($password, $user->getPassword())) {
             $_SESSION['error'] = 'Credenciales incorrectas xd';
             return $this->redirect('/login');
         }else{
             // Login exitoso: Regenerar sesión y guardar datos
             session_regenerate_id(true);
-
+            $this->rotateCsrf();
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             $_SESSION['user_id'] = $user->getId();
             $_SESSION['user_email'] = $user->getEmail();
             $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
             $_SESSION['user_role'] = $user->getRole();  // ← NUEVO: Guarda rol en sesión
             return $this->redirect('/dashboard');
         }
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**
@@ -236,6 +227,7 @@ class AuthController extends BaseController{
 
         if ($userId) {
             $_SESSION['register_success'] = 'Usuario creado exitosamente. <a href="/login">Inicia sesión</a>';
+            $this->rotateCsrf();
             return $this->redirect('/register');
         } else {
             $_SESSION['register_error'] = 'Error al crear usuario (inténtalo de nuevo).';

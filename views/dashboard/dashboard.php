@@ -18,7 +18,9 @@
         <?php endif; ?>
         <form action="/logout" method="POST">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            <a href="/admin/users/">Admin Panel</a>
+            <?php if (($_SESSION['user_role'] ?? 'user') === 'admin'): ?>
+                <a href="/admin/users">Admin Panel</a>
+            <?php endif; ?>
             <button type="submit">Cerrar sesión</button>
         </form>
     </div>

@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="login-container">
-    <form class="login-form" method="POST" action="/register">
+    <form id="registerForm" class="login-form" method="POST" action="/register">
         <h1><?= htmlspecialchars($title ?? 'Registro') ?></h1>
 
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
@@ -69,6 +69,8 @@
         <p><a href="/login">¿Ya tienes cuenta? Inicia sesión</a></p>
     </form>
 </div>
+
+<script src="/js/validacion.js"></script>
 
 <!-- JS match passwords -->
 <script>

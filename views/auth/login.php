@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="login-container">
-    <form class="login-form" method="POST" action="/login">
+    <form id="loginForm" class="login-form" method="POST" action="/login">
         <h1><?= htmlspecialchars($title ?? 'Login') ?></h1>
 
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
@@ -38,5 +38,7 @@
         <p>¿Ya tienes cuenta? <a href="/register">Registrarse</a></p>
     </form>
 </div>
+
+<script src="/js/validacion.js"></script>
 </body>
 </html>

@@ -92,7 +92,7 @@ abstract  class BaseController
     /**
      * Redireccionar
      */
-    protected function redirect(string $url): void  {
+   protected function redirect(string $url): void  {
         header("Location: {$url}");
         exit;
     }
@@ -130,6 +130,16 @@ abstract  class BaseController
         }
         $_SESSION['csrf_token_time'] = time();  // Reset expiración si usas
         return $_SESSION['csrf_token'];
+    }
+
+
+    // app/Controllers/BaseController.php
+    protected function rotateCsrf(): string
+    {
+        $new = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token'] = $new;
+        $_SESSION['csrf_token_time'] = time(); // opcional TTL
+        return $new;
     }
 
 

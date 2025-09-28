@@ -3,6 +3,7 @@
 namespace Enoc\Login\Core;
 
 use Enoc\Login\Core\PdoConnection;
+use Enoc\Login\Middleware\MiddlewareFactory;
 
 class Router
 {
@@ -21,8 +22,8 @@ class Router
     private array $routes = [];
     private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
     private PdoConnection $pdoConnection;
-
-    private array $protectedRoutes = [];  // ← NUEVO: Array de rutas que requieren auth (e.g., ['/dashboard'])
+    private array $routeMiddleware = []; // ← esta línea
+    //private array $protectedRoutes = [];  // ← NUEVO: Array de rutas que requieren auth (e.g., ['/dashboard'])
 
     public function __construct(PdoConnection $pdoConnection) {
         $this->pdoConnection = $pdoConnection;
@@ -104,6 +105,12 @@ class Router
         $this->protectedRoutes[] = rtrim($path, '/') ?: '/';
     }
 
+    public function middleware(string $method, string $path, array $middlewareList): void
+    {
+        $method = strtoupper($method);
+        $path   = rtrim($path, '/') ?: '/';
+        $this->routeMiddleware[$method][$path] = $middlewareList;
+    }
 
 
 
@@ -126,12 +133,11 @@ class Router
         $normalizedMethod = strtoupper($requestMethod);
         $routesForMethod = $this->routes[$normalizedMethod] ?? null;
 
-        // ← NUEVO: Middleware de auth - Chequea si ruta protegida
-        if (in_array($uri, $this->protectedRoutes, true) && empty($_SESSION['user_id'])) {
-            // No logueado: Redirect a login
-            header('Location: /login');
-            exit('Redirecting to login...');
-        }
+     // ← NUEVO: middleware pipeline (reemplaza protectRoute)
+        $middlewareKeys = $this->routeMiddleware[$normalizedMethod][$path] ?? [];
+        foreach ($middlewareKeys as $key) {
+            MiddlewareFactory::make($key)->handle();
+        } // lanza redirect o exit
 
         // Buscar la ruta exacta
         if (is_array($routesForMethod) && isset($routesForMethod[$uri])) {
@@ -210,6 +216,7 @@ class Router
 
         return $allowedMethods;
     }
+
 
 
 

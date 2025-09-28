@@ -15,10 +15,8 @@ class AdminController extends BaseController
     public function __construct(PdoConnection $pdoConnection)
     {
         $this->repository = new UsuarioRepository($pdoConnection);
-        // ← Chequea auth + role (middleware-like)
-        if (empty($_SESSION['user_id']) || ($_SESSION['user_role'] ?? 'user') !== 'admin') {
-            $this->redirect('/login');
-        }
+
+
     }
 
     // Listar users (con paginación básica)
@@ -101,17 +99,16 @@ class AdminController extends BaseController
         // Repo (sin validación extra – trait ya hizo 'unique')
         $userId = $this->repository->createUser($email, $name, $password, $role);
 
-        if ($userId) {
-            $_SESSION['success'] = 'Usuario creado exitosamente';
-            // Limpia prefill en success
-            unset($_SESSION['input_name'], $_SESSION['input_email']);
-        } else {
-            $_SESSION['error'] = 'Error interno al crear usuario (contacta admin).';  // Genérico, ya que trait filtró comunes
-            $_SESSION['input_name'] = $name;
-            $_SESSION['input_email'] = $email;
-            return $this->redirect('/admin/users/create');
-        }
+        if (!$userId) {
+        $_SESSION['error'] = 'Error interno …';
+        $_SESSION['input_name']  = $name;
+        $_SESSION['input_email'] = $email;
+        return $this->redirect('/admin/users/create');
+    }
 
+        $_SESSION['success'] = 'Usuario creado exitosamente';
+        unset($_SESSION['input_name'], $_SESSION['input_email']);
+        $this->rotateCsrf();
         return $this->redirect('/admin/users');
     }
 
@@ -164,13 +161,13 @@ class AdminController extends BaseController
         // Repo call (password null si vacío)
         $success = $this->repository->updateUser($id, $name, $email, $password ?: null, $role);
 
-        if ($success) {
-            $_SESSION['success'] = 'Usuario actualizado!';
-        } else {
+        if (!$success) {
             $_SESSION['error'] = 'Error al actualizar';
             return $this->redirect("/admin/users/edit?id=$id");
         }
 
+        $_SESSION['success'] = 'Usuario actualizado!';
+        $this->rotateCsrf();
         return $this->redirect('/admin/users');
     }
 
@@ -218,6 +215,7 @@ class AdminController extends BaseController
 
         if ($this->repository->deleteUser($id)) {  // Ya soft-delete
             $_SESSION['success'] = 'Usuario borrado exitosamente';
+            $this->rotateCsrf();
         } else {
             $_SESSION['error'] = 'Error al borrar usuario';
         }

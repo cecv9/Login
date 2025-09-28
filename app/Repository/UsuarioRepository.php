@@ -31,7 +31,7 @@ class UsuarioRepository implements UserRepositoryInterface
     public function __construct(PdoConnection $conector)
     {
         $this->pdo = $conector->getPdo();
-        $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+        $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     }
 
     /**
