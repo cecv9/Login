@@ -51,7 +51,18 @@ trait ValidatorTrait
                             if ($existing) {
                                 $errors[$field][] = 'Email ya registrado';
                             }
+
                         }
+                        $ruleParts = explode(':', $rule);  // ['unique', 'id=123']
+                        $exceptId = null;
+                        if (count($ruleParts) > 1 && strpos($ruleParts[1], 'id=') === 0) {
+                            $exceptId = (int)substr($ruleParts[1], 3);  // Extrae 123
+                        }
+                        $existing = $this->repository->findByEmail($value);
+                        if ($existing && $existing->getId() !== $exceptId) {  // Skip si es el mismo ID
+                            $errors[$field][] = 'Email ya registrado';
+                        }
+
                         break;
                     case 'in:user,admin':  // ← FIX: Case específico para 'in' – no general 'in:'
                         // Corta 'in:' → 'user,admin'

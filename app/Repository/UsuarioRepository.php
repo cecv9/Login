@@ -8,7 +8,7 @@ use Enoc\Login\models\Users;
 use PDO;
 use PDOException;
 
-interface UserRepositoryInterface{
+interface UserRepositoryInterface {
     public function findById(int $id): ?Users;
     public function findByEmail(string $email): ?Users;
 
@@ -140,8 +140,7 @@ class UsuarioRepository implements UserRepositoryInterface
 
 
 
-    public function findAllUsers(int $limit = 10, int $offset = 0): array
-    {
+    public function findAllUsers(int $limit = 10, int $offset = 0): array {
         try {
             // 2) Sanitizar/topes
             $limit  = min(100, max(1, $limit));
@@ -179,8 +178,7 @@ class UsuarioRepository implements UserRepositoryInterface
         }
     }
 
-    public function countUsers(): int
-    {
+    public function countUsers(): int {
         try {
             $stmt = $this->pdo->prepare(
                 'SELECT COUNT(*) FROM users WHERE deleted_at IS NULL'
@@ -201,8 +199,7 @@ class UsuarioRepository implements UserRepositoryInterface
     }
 
 
-    public function updateUser(int $id, string $name, string $email, ?string $password, string $role): bool
-    {
+    public function updateUser(int $id, string $name, string $email, ?string $password, string $role): bool {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return false;
 
         try {
@@ -229,8 +226,7 @@ class UsuarioRepository implements UserRepositoryInterface
         }
     }
 
-    public function updateUserRole(int $id, string $role): bool
-    {
+    public function updateUserRole(int $id, string $role): bool {
         try {
             $stmt = $this->pdo->prepare('UPDATE users SET role = :role WHERE id = :id');
             return $stmt->execute(['role' => $role, 'id' => $id]) && $stmt->rowCount() > 0;
@@ -240,8 +236,7 @@ class UsuarioRepository implements UserRepositoryInterface
         }
     }
 
-    public function deleteUser(int $id): bool
-    {
+    public function deleteUser(int $id): bool {
         try {
             $stmt = $this->pdo->prepare('UPDATE users SET deleted_at = NOW() WHERE id = :id');  // Soft-delete
             return $stmt->execute(['id' => $id]) && $stmt->rowCount() > 0;

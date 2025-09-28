@@ -195,6 +195,10 @@ try {
     // ← NUEVO: Marca rutas protegidas (agrega las que quieras)
     $router->protectRoute('/dashboard');  // Solo /dashboard requiere auth por ahora
     $router->protectRoute('/admin/users/index.php', 'admin');  // /admin requiere rol admin
+    $router->protectRoute('/admin/users/create.php', 'admin');
+    $router->protectRoute('/admin/users/edit.php', 'admin');
+    $router->protectRoute('/admin/users/delete.php', 'admin');
+
 
 
     // Procesar petición actual

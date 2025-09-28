@@ -18,6 +18,7 @@ if (is_file($navbar)) {
 ?>
 
 <div class="admin-container">
+
     <h1>Usuarios</h1>
     <a href="/admin/users/create">Crear Nuevo</a>
     <?php if (isset($_SESSION['success'])): ?>

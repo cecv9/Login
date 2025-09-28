@@ -15,8 +15,16 @@
 
         <?php if (isset($success) && $success !== '') : ?>
             <div class="success">
-                <?= htmlspecialchars($success) ?>
+                <?= $success ?>  <!-- Ya escapado en controller -->
             </div>
+        <?php endif; ?>
+
+        <!-- ← NUEVO: Errores por Campo del Trait -->
+        <?php if (isset($_SESSION['register_errors']) && !empty($_SESSION['register_errors'])): ?>
+            <?php foreach ($_SESSION['register_errors'] as $field => $fieldErrors): ?>
+                <div class="field-error"><?= htmlspecialchars(implode('<br>', $fieldErrors)) ?></div>
+            <?php endforeach; ?>
+            <?php unset($_SESSION['register_errors']); ?>
         <?php endif; ?>
 
         <?php if (isset($error) && $error !== '') : ?>
@@ -25,29 +33,53 @@
             </div>
         <?php endif; ?>
 
-        <div class="form-group">
+        <div class="form-group <?= isset($_SESSION['register_errors']['name']) ? 'has-error' : '' ?>">
             <label for="name">Nombre:</label>
-            <input type="text" id="name" name="name" required minlength="2">
+            <input type="text" id="name" name="name" value="<?= htmlspecialchars($name ?? '') ?>" required minlength="2">
+            <?php if (isset($_SESSION['register_errors']['name'])): ?>
+                <small class="error-text"><?= htmlspecialchars(end($_SESSION['register_errors']['name'])) ?></small>
+            <?php endif; ?>
         </div>
 
-        <div class="form-group">
+        <div class="form-group <?= isset($_SESSION['register_errors']['email']) ? 'has-error' : '' ?>">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email" value="<?= htmlspecialchars($email ?? '') ?>" required>
+            <?php if (isset($_SESSION['register_errors']['email'])): ?>
+                <small class="error-text"><?= htmlspecialchars(end($_SESSION['register_errors']['email'])) ?></small>
+            <?php endif; ?>
         </div>
 
-        <div class="form-group">
+        <div class="form-group <?= isset($_SESSION['register_errors']['password']) ? 'has-error' : '' ?>">
             <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" required minlength="6">
+            <?php if (isset($_SESSION['register_errors']['password'])): ?>
+                <small class="error-text"><?= htmlspecialchars(end($_SESSION['register_errors']['password'])) ?></small>
+            <?php endif; ?>
         </div>
 
-        <div class="form-group">
+        <div class="form-group <?= isset($_SESSION['register_errors']['confirm_password']) ? 'has-error' : '' ?>">
             <label for="confirm_password">Confirmar Contraseña:</label>
             <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+            <?php if (isset($_SESSION['register_errors']['confirm_password'])): ?>
+                <small class="error-text"><?= htmlspecialchars(end($_SESSION['register_errors']['confirm_password'])) ?></small>
+            <?php endif; ?>
         </div>
 
         <button type="submit">Registrarse</button>
         <p><a href="/login">¿Ya tienes cuenta? Inicia sesión</a></p>
     </form>
 </div>
+
+<!-- JS match passwords -->
+<script>
+    document.querySelector('form').addEventListener('submit', e => {
+        const pass = document.getElementById('password').value;
+        const confirm = document.getElementById('confirm_password').value;
+        if (pass !== confirm) {
+            alert('Contraseñas no coinciden');
+            e.preventDefault();
+        }
+    });
+</script>
 </body>
 </html>

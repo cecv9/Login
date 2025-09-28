@@ -7,12 +7,14 @@ namespace Enoc\Login\Controllers;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Repository\UsuarioRepository;
 use Enoc\Login\models\Users;
+use Enoc\Login\Traits\ValidatorTrait;
 
 
 
 class AuthController extends BaseController{
 
     private UsuarioRepository $repository;
+    use ValidatorTrait;
 
     public function __construct (PdoConnection $pdoConnection){
         $this->repository = new UsuarioRepository($pdoConnection);
@@ -99,43 +101,6 @@ class AuthController extends BaseController{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // var_dump($email, $user ? $user->getPassword() : 'User null'); // Debug
         if (!$user || !password_verify($password, $user->getPassword())) {
             $_SESSION['error'] = 'Credenciales incorrectas xd';
@@ -215,11 +180,16 @@ class AuthController extends BaseController{
         $success = $_SESSION['register_success'] ?? null;
         unset($_SESSION['register_success']);
 
+        $name = $_SESSION['input_name'] ?? ''; unset($_SESSION['input_name']);
+        $email = $_SESSION['input_email'] ?? ''; unset($_SESSION['input_email']);
+
         return $this->view('auth.register', [
             'title' => 'Registro de Usuario',
             'error' => $error,
             'success' => $success,
-            'csrfToken' => $_SESSION['csrf_token'] ?? ''  // Pasa CSRF
+            'csrfToken' => $_SESSION['csrf_token'] ?? '',  // Pasa CSRF
+            'name' => $name,
+            'email' => $email
         ]);
     }
 
@@ -243,33 +213,34 @@ class AuthController extends BaseController{
         $password = $this->getPost('password', '');
         $confirmPassword = $this->getPost('confirm_password', '');
 
-        // Validaciones (SRP: Controller valida input)
-        $errors = [];
-        if (empty($name) || strlen($name) < 2) {
-            $errors[] = 'Nombre requerido (mín. 2 chars)';
-        }
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Email válido requerido';
-        }
-        if (empty($password) || strlen($password) < 6) {
-            $errors[] = 'Contraseña mínima 6 chars';
-        }
-        if ($password !== $confirmPassword) {
-            $errors[] = 'Contraseñas no coinciden';
-        }
+        // ← TRAIT: Reglas sin role
+        $rules = [
+            'name' => ['required', 'min:2'],
+            'email' => ['required', 'email', 'unique'],  // Duplicado pre-repo
+            'password' => ['required', 'min:6'],
+            'confirmPassword' => ['required', 'min:6', 'match:password']
+        ];
+
+        $data = compact('name', 'email', 'password', 'confirmPassword');
+        $errors = $this->validateUserData($data, $rules);  // ← LLAMA TRAIT
 
         if (!empty($errors)) {
-            $_SESSION['register_error'] = implode('<br>', $errors);
+            $_SESSION['register_errors'] = $errors;  // Por campo
+            $_SESSION['input_name'] = $name;  // Prefill
+            $_SESSION['input_email'] = $email;
             return $this->redirect('/register');
         }
 
-        // Insert via repo
-        $userId = $this->repository->createUser($email, $password, $name);
+        // Repo (default role 'user')
+        $userId = $this->repository->createUser($email, $password, $name, 'user');  // ← Orden: email, pass, name, role (ajusta si signature diferente)
+
         if ($userId) {
             $_SESSION['register_success'] = 'Usuario creado exitosamente. <a href="/login">Inicia sesión</a>';
-            return $this->redirect('/register');  // O directo a login
+            return $this->redirect('/register');
         } else {
-            $_SESSION['register_error'] = 'Error al crear usuario (email ya existe?).';
+            $_SESSION['register_error'] = 'Error al crear usuario (inténtalo de nuevo).';
+            $_SESSION['input_name'] = $name;
+            $_SESSION['input_email'] = $email;
             return $this->redirect('/register');
         }
     }

@@ -137,26 +137,41 @@ class AdminController extends BaseController
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $email = trim(strtolower($_POST['email'] ?? ''));
-        $role = $_POST['role'] ?? 'user';
         $password = $_POST['password'] ?? null;  // Opcional
+        $confirm_password = $_POST['confirm_password'] ?? '';
+        $role = $_POST['role'] ?? 'user';
 
-        // ... validaciones ...
-        $password = $_POST['password'] ?? null;
-        $confirmPassword = $_POST['confirm_password'] ?? null;
-        if ($password && $password !== $confirmPassword) {
-            $errors[] = 'Contraseñas no coinciden';
-        }
-        if ($password && strlen($password) < 6) {
-            $errors[] = 'Contraseña mínima 6 chars';
+
+        // ← TRAIT: Reglas para update (password opcional, unique con ID)
+        $rules = [
+            'name' => ['required', 'min:2'],
+            'email' => ['required', 'email', "unique:id=$id"],  // ← Pasa ID para skip propio
+            'password' => ['min:6'],  // No required
+            'confirm_password' => ['min:6', 'match:password'],  // Solo si password no vacío
+            'role' => ['required', 'in:user,admin']
+        ];
+
+        $data = compact('name', 'email', 'password', 'confirm_password', 'role');
+        $errors = $this->validateUserData($data, $rules);
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['input_name'] = $name;
+            $_SESSION['input_email'] = $email;
+            return $this->redirect("/admin/users/edit?id=$id");  // Back a edit con prefill
         }
 
-        if ($this->repository->updateUser($id, $name, $email, $password, $role)) {
+        // Repo call (password null si vacío)
+        $success = $this->repository->updateUser($id, $name, $email, $password ?: null, $role);
+
+        if ($success) {
             $_SESSION['success'] = 'Usuario actualizado!';
         } else {
             $_SESSION['error'] = 'Error al actualizar';
+            return $this->redirect("/admin/users/edit?id=$id");
         }
 
-        return $this->redirect('/admin/users/');
+        return $this->redirect('/admin/users');
     }
 
     // Delete confirm
