@@ -42,8 +42,8 @@ if (is_file($navbar)) {
                     <td><?= htmlspecialchars($user->getEmail()) ?></td>
                     <td><?= htmlspecialchars($user->getRole() ?? 'user') ?></td>
                     <td>
-                        <a href="/admin/users/edit?id=<?= $user->getId() ?>">Editar</a>
-                        <a href="/admin/users/delete?id=<?= $user->getId() ?>" onclick="return confirm('¿Seguro?')">Borrar</a>
+                        <a href="/admin/users/edit?id=<?= htmlspecialchars((string)$user->getId()) ?>">Editar</a>
+                        <a href="/admin/users/delete?id=<?= htmlspecialchars((string)$user->getId()) ?>" onclick="return confirm('¿Borrar este usuario?')">Borrar</a>  <!-- ← FIX: Mensaje más claro, escape ID -->
                     </td>
                 </tr>
             <?php endforeach; ?>

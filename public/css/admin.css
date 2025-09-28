@@ -163,3 +163,8 @@ td:last-child a[href*="delete"]:hover {
         margin: 5px 0;
     }
 }
+
+.has-error { border-left: 4px solid red; background: #fff5f5; padding-left: 10px; }  /* Resalta div entero */
+.has-error input, .has-error select { border-color: red; }  /* Input rojo */
+.error-text { color: red; font-size: 0.8em; display: block; margin-top: 2px; }  /* Mensaje pequeño bajo input */
+.field-error { color: red; background: #ffe; padding: 10px; margin: 10px 0; border: 1px solid red; }  /* Error global por campo */
