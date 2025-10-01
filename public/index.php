@@ -2,6 +2,7 @@
 declare(strict_types=1);
 use Enoc\Login\Core\Router;
 use Dotenv\Dotenv;
+use Enoc\Login\Core\LogManager;
 use Enoc\Login\Config\DatabaseConfig;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Core\DatabaseConnectionException;
@@ -15,10 +16,25 @@ $rootPath = dirname(__DIR__);
  */
 Dotenv::createImmutable($rootPath)->safeLoad();
 
-/**
- * 2) Modo debug / errores
- */
+// Inicializar LogManager
+LogManager::init();
+LogManager::info('Aplicación iniciada');
+
+/*****************************************************************
+ * 2) Modo debug / errores + seguridad de producción
+ *****************************************************************/
 $appDebug = filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+/* Si estamos en producción (no CLI) y alguien deja APP_DEBUG=true → cortar */
+if ($appDebug && php_sapi_name() !== 'cli') {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "Internal Server Error\n";
+    LogManager::error('APP_DEBUG=true en producción. Apágalo.');
+    exit;
+}
+
+/* Configuración de errores (solo si llegamos aquí) */
 if ($appDebug) {
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
@@ -26,6 +42,7 @@ if ($appDebug) {
     error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
     ini_set('display_errors', '0');
 }
+
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'UTC');
 
 /**
@@ -207,19 +224,33 @@ try {
 
     echo $router->dispatch($requestUri, $requestMethod);
 
-} catch (\Throwable $e) {
+}  catch (\Throwable $e) {
     http_response_code(500);
-   // echo "Error del servidor: " . htmlspecialchars($e->getMessage());
+    header('Content-Type: text/html; charset=utf-8');
+    header('X-Frame-Options: DENY');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: no-referrer');
 
-    // En desarrollo, mostrar stack trace
-    error_log('Unhandled exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-    if ($appDebug) {
-        echo 'Error del servidor: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
-        echo '<pre>' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES, 'UTF-8') . '</pre>';
+    // Log interno
+    LogManager::error('Unhandled exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+
+    if ($appDebug && php_sapi_name() !== 'cli') {
+        echo '<h1>Error 500</h1>';
+        echo '<p>' . htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>';
+        echo '<pre>' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
     } else {
-        echo 'Error interno del servidor.';
+        echo 'Lo sentimos, algo salió mal. Inténtalo más tarde.';
     }
 
+    /*********************************************************
+     * HEADERS DE SEGURIDAD (TODAS las respuestas)
+     *********************************************************/
+    if (php_sapi_name() !== 'cli') {
+        header('X-Frame-Options: DENY');
+        header('X-Content-Type-Options: nosniff');
+        header('Referrer-Policy: no-referrer');
+        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none';");
+    }
     exit;
 
 }

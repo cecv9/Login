@@ -16,6 +16,10 @@ if (is_file($navbar)) {
     // echo "<!-- navbar missing -->";
 }
 ?>
+<?php
+/** @var int $afterId */
+/** @var Users[] $users */
+?>
 
 <div class="admin-container">
 
@@ -52,12 +56,19 @@ if (is_file($navbar)) {
         </tbody>
     </table>
 
-    <!-- Paginación simple -->
+    <!-- Cursor-based pagination -->
     <div class="pagination">
-        <?php if ($page > 1): ?><a href="?page=<?= $page - 1 ?>">Anterior</a><?php endif; ?>
-        Página <?= $page ?> de <?= $pages ?>
-        <?php if ($page < $pages): ?><a href="?page=<?= $page + 1 ?>">Siguiente</a><?php endif; ?>
+        <?php if (!empty($showNext) && $nextAfter !== null): ?>
+            <a class="btn" href="?after=<?= (int)$nextAfter ?>&limit=<?= (int)$limit ?>">Siguiente →</a>
+        <?php endif; ?>
+
+        <?php if (!empty($showPrev) && $prevBefore !== null): ?>
+            <a class="btn" href="?before=<?= (int)$prevBefore ?>&limit=<?= (int)$limit ?>">← Anterior</a>
+        <?php endif; ?>
     </div>
+
+
+
 </div>
 </body>
 </html>

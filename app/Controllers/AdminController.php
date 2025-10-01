@@ -22,21 +22,46 @@ class AdminController extends BaseController
     // Listar users (con paginación básica)
     public function index(): string
     {
-        $limit = 10;
-        $page = (int)($_GET['page'] ?? 1);
-        $offset = ($page - 1) * $limit;
-        $users = $this->repository->findAllUsers($limit, $offset);  // Implementa en repo
-        $total = $this->repository->countUsers();  // Para paginación
-        $pages = ceil($total / $limit);
+        $limit  = min(100, max(1, (int)($_GET['limit'] ?? 10)));
+        $after  = isset($_GET['after'])  ? (int)$_GET['after']  : null; // id < after (más antiguos)
+        $before = isset($_GET['before']) ? (int)$_GET['before'] : null; // id > before (más nuevos)
+
+        if ($before !== null) {
+            $users = $this->repository->findPageBefore($before, $limit);
+        } else {
+            $cursor = $after ?? PHP_INT_MAX; // interno, nunca lo enlaces
+            $users  = $this->repository->findPageAfter($cursor, $limit);
+        }
+
+        $has = !empty($users);
+        $firstId = $has ? $users[0]->getId() : null;                       // mayor id mostrado
+        $lastId  = $has ? $users[array_key_last($users)]->getId() : null;  // menor id mostrado
+
+        $isFirstPage = ($after === null && $before === null);
+
+        // ---- Aquí usamos las funciones nuevas para evitar páginas vacías ----
+        $hasMoreOlder = $has && $lastId  !== null ? $this->repository->hasMoreOlder((int)$lastId)   : false;
+        $hasMoreNewer = $has && $firstId !== null ? $this->repository->hasMoreNewer((int)$firstId) : false;
+
+        // “Siguiente” solo si realmente hay más antiguos
+        $showNext = $has && $hasMoreOlder;
+
+        // “Anterior” solo si no es la primera página y realmente hay más nuevos
+        $showPrev = $has && !$isFirstPage && $hasMoreNewer;
 
         return $this->view('admin.users.index', [
-            'title' => 'admin - Usuarios',
-            'users' => $users,
-            'page' => $page,
-            'pages' => $pages,
-            'csrfToken' => $this->generateCsrfToken()  // Si usas CSRF en forms
+            'title'      => 'admin - Usuarios',
+            'users'      => $users,
+            'showNext'   => $showNext,
+            'showPrev'   => $showPrev,
+            'nextAfter'  => $lastId,    // para ?after=
+            'prevBefore' => $firstId,   // para ?before=
+            'limit'      => $limit,
+            'csrfToken'  => $this->generateCsrfToken(),
         ]);
     }
+
+
 
     // Form create
     public function create(): string

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Enoc\Login\Repository;
 
+use Enoc\Login\Core\LogManager;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\models\Users;
 use PDO;
@@ -62,7 +63,7 @@ class UsuarioRepository implements UserRepositoryInterface
 
             return $user;
         } catch (PDOException $e) {
-            error_log('Error al buscar usuario por ID: ' . $e->getMessage());
+            LogManager::error('Error al buscar usuario por ID: ' . $e->getMessage());
             return null;
         }
     }
@@ -94,7 +95,7 @@ class UsuarioRepository implements UserRepositoryInterface
 
             return $user;
         } catch (PDOException $e) {
-            error_log('Error al buscar usuario por email: ' . $e->getMessage());
+            LogManager::error('Error al buscar usuario por email: ' . $e->getMessage());
             return null;
         }
     }
@@ -108,7 +109,7 @@ class UsuarioRepository implements UserRepositoryInterface
         $cleanName = trim($name);
 
         if (!filter_var($cleanEmail, FILTER_VALIDATE_EMAIL) || empty($cleanPass) || strlen($cleanPass) < 6 || !in_array($role, ['user', 'admin'])) {
-            error_log('Registro falló: Validación input inválida');  // Si tienes debug
+            LogManager::error('Registro falló: Validación input inválida');  // Si tienes debug
             return null;
         }
 
@@ -133,10 +134,145 @@ class UsuarioRepository implements UserRepositoryInterface
           //  return $newId;
         } catch (PDOException $e) {
            // error_log('Registro falló: PDO Error - ' . $e->getMessage() . ' | Email: ' . $cleanEmail);  // DEBUG TEMPORAL
-            error_log('Error al crear usuario: ' . $e->getMessage());
+            LogManager::error('Error al crear usuario: ' . $e->getMessage());
             return null;
         }
     }
+
+    /*****************************************************************
+     * 2) INICIO PAGINACION POR CURSOR (SIN OFFSET)
+     *    - findPageAfter($lastId, $limit)
+     *    - findPageBefore($firstId, $limit)
+     *   - hasMoreOlder($lastId)
+     *  - hasMoreNewer($firstId)
+     *****************************************************************/
+
+    /**
+     * Cursor-based pagination (sin OFFSET)
+     * @param int $lastId  id del último registro de la página anterior
+     * @param int $limit   cuántos traer
+     * @return Users[]
+     */
+    public function findPageAfter(int $lastId, int $limit = 10): array
+    {
+        try {
+            $sql = 'SELECT id, email, name, role, created_at
+                FROM users
+                WHERE deleted_at IS NULL
+                  AND id < :last_id
+                ORDER BY id DESC
+                LIMIT :limit';
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':last_id', $lastId, PDO::PARAM_INT);
+            $stmt->bindValue(':limit',   $limit,   PDO::PARAM_INT);
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $users = [];
+            foreach ($rows as $row) {
+                $user = new Users();
+                $user->setId((int)$row['id']);
+                $user->setEmail($row['email']);
+                $user->setName($row['name']);
+                $user->setRole($row['role'] ?? 'user');
+                $users[] = $user;
+            }
+            return $users;
+        } catch (PDOException $e) {
+            LogManager::error('Error paginando: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+
+    public function findPageBefore(int $firstId, int $limit = 10): array
+    {
+        try {
+            $sql = 'SELECT id, email, name, role, created_at
+                FROM users
+                WHERE deleted_at IS NULL
+                  AND id > :first_id
+                ORDER BY id ASC
+                LIMIT :limit';
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':first_id', $firstId, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit',    $limit,   \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Invertimos para mostrar en DESC en la vista
+            $rows = array_reverse($rows);
+
+            $users = [];
+            foreach ($rows as $row) {
+                $u = new Users();
+                $u->setId((int)$row['id']);
+                $u->setEmail($row['email']);
+                $u->setName($row['name']);
+                $u->setRole($row['role'] ?? 'user');
+                $users[] = $u;
+            }
+            return $users;
+        } catch (\PDOException $e) {
+            LogManager::error('Error paginando (before): ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function hasMoreOlder(int $lastId): bool
+    {
+        try {
+            $sql = 'SELECT id
+                FROM users
+                WHERE deleted_at IS NULL
+                  AND id < :last_id
+                ORDER BY id DESC
+                LIMIT 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':last_id', $lastId, \PDO::PARAM_INT);
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            LogManager::error('Error en hasMoreOlder: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Opcional: para saber si hay registros más nuevos que el primero de la página actual.
+     * Así “← Anterior” no manda a una página vacía.
+     */
+    public function hasMoreNewer(int $firstId): bool
+    {
+        try {
+            $sql = 'SELECT id
+                FROM users
+                WHERE deleted_at IS NULL
+                  AND id > :first_id
+                ORDER BY id ASC
+                LIMIT 1';
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':first_id', $firstId, \PDO::PARAM_INT);
+            $stmt->execute();
+            return (bool)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            LogManager::error('Error en hasMoreNewer: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /*****************************************************************
+     * 2)  FIN PAGINACION POR CURSOR (SIN OFFSET)
+     *    - findPageAfter($lastId, $limit)
+     *    - findPageBefore($firstId, $limit)
+     *   - hasMoreOlder($lastId)
+     *  - hasMoreNewer($firstId)
+     *****************************************************************/
+
+
 
 
 
@@ -173,7 +309,7 @@ class UsuarioRepository implements UserRepositoryInterface
             return $users;
 
         } catch (PDOException $e) {
-            error_log('Error listando users: ' . $e->getMessage());
+            LogManager::error('Error listando users: ' . $e->getMessage());
             return [];
         }
     }
@@ -193,7 +329,7 @@ class UsuarioRepository implements UserRepositoryInterface
            // }
             return $count;
         } catch (PDOException $e) {
-            error_log('Error contando users: ' . $e->getMessage());
+            LogManager::error('Error contando users: ' . $e->getMessage());
             return 0;
         }
     }
@@ -221,7 +357,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute($params) && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            error_log('Error actualizando user: ' . $e->getMessage());
+            LogManager::error('Error actualizando user: ' . $e->getMessage());
             return false;
         }
     }
@@ -231,7 +367,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt = $this->pdo->prepare('UPDATE users SET role = :role WHERE id = :id');
             return $stmt->execute(['role' => $role, 'id' => $id]) && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            error_log('Error actualizando role: ' . $e->getMessage());
+            LogManager::error('Error actualizando role: ' . $e->getMessage());
             return false;
         }
     }
@@ -241,7 +377,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt = $this->pdo->prepare('UPDATE users SET deleted_at = NOW() WHERE id = :id');  // Soft-delete
             return $stmt->execute(['id' => $id]) && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            error_log('Error borrando user: ' . $e->getMessage());
+            LogManager::error('Error borrando user: ' . $e->getMessage());
             return false;
         }
     }
