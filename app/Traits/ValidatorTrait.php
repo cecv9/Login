@@ -3,95 +3,99 @@ declare(strict_types=1);
 
 namespace Enoc\Login\Traits;
 
-use Enoc\Login\Repository\UsuarioRepository;
-
 trait ValidatorTrait
 {
-    /**
-     * Valida datos de usuario con reglas escalables.
-     * @param array $data Datos POST (name, email, password, etc.)
-     * @param array $rules Reglas por campo: ['email' => ['required', 'email', 'unique']]
-     * @return array Errores (campo => mensaje)
-     */
     private function validateUserData(array $data, array $rules): array
     {
         $errors = [];
 
         foreach ($rules as $field => $fieldRules) {
-            $value = trim($data[$field] ?? '');
+            $raw = $data[$field] ?? '';
+            $value = is_string($raw) ? trim($raw) : (string)$raw;
+
+            if ($field === 'email') {
+                $value = strtolower($value);
+            }
 
             foreach ($fieldRules as $rule) {
-                switch ($rule) {
-                    case 'required':
-                        if (empty($value)) {
-                            $fieldName = ucfirst(str_replace('_', ' ', $field));
-                            $errors[$field][] = $fieldName . ' es requerido';
+                if ($rule === 'required') {
+                    if ($value === '') {
+                        $errors[$field][] = self::label($field) . ' es requerido';
+                    }
+                    continue;
+                }
+                if ($rule === 'email') {
+                    if ($value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $errors[$field][] = 'Email inválido';
+                    }
+                    continue;
+                }
+                if (str_starts_with($rule, 'min:')) {
+                    $min = (int)substr($rule, 4);
+                    if (mb_strlen($value) < $min) {
+                        $errors[$field][] = self::label($field) . " mínimo {$min} caracteres";
+                    }
+                    continue;
+                }
+                if (str_starts_with($rule, 'max:')) {
+                    $max = (int)substr($rule, 4);
+                    if (mb_strlen($value) > $max) {
+                        $errors[$field][] = self::label($field) . " máximo {$max} caracteres";
+                    }
+                    continue;
+                }
+                if (str_starts_with($rule, 'in:')) {
+                    $allowed = array_map('trim', explode(',', substr($rule, 3)));
+                    if (!in_array($value, $allowed, true)) {
+                        $errors[$field][] = self::label($field) . ' inválido';
+                    }
+                    continue;
+                }
+                if (str_starts_with($rule, 'match:')) {
+                    $targetField = substr($rule, 6);
+                    $targetValue = isset($data[$targetField]) ? trim((string)$data[$targetField]) : '';
+                    if ($value !== $targetValue) {
+                        $errors[$field][] = self::label($field) . ' no coincide con ' . self::label($targetField);
+                    }
+                    continue;
+                }
+                if ($rule === 'unique' || str_starts_with($rule, 'unique:')) {
+                    $exceptId = null;
+                    if (str_starts_with($rule, 'unique:')) {
+                        $after = substr($rule, 7); // ej. 'id=123'
+                        if (str_starts_with($after, 'id=')) {
+                            $exceptId = (int)substr($after, 3);
                         }
-                        break;
-                    case 'min:2':
-                        if (strlen($value) < 2) {
-                            $fieldName = ucfirst(str_replace('_', ' ', $field));
-                            $errors[$field][] = $fieldName . ' mínimo 2 caracteres';
-                        }
-                        break;
-                    case 'min:6':
-                        if (strlen($value) < 6) {
-                            $fieldName = ucfirst(str_replace('_', ' ', $field));
-                            $errors[$field][] = $fieldName . ' mínimo 6 caracteres';
-                        }
-                        break;
-                    case 'email':
-                        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                            $errors[$field][] = 'Email inválido';
-                        }
-                        break;
-                    case 'unique':
-                        if (isset($this->repository)) {
+                    }
+                    if (isset($this->repository) && method_exists($this->repository, 'findByEmail')) {
+                        if ($value !== '') {
                             $existing = $this->repository->findByEmail($value);
                             if ($existing) {
-                                $errors[$field][] = 'Email ya registrado';
+                                $existingId = null;
+                                if (is_array($existing) && isset($existing['id'])) {
+                                    $existingId = (int)$existing['id'];
+                                } elseif (is_object($existing) && method_exists($existing, 'getId')) {
+                                    $existingId = (int)$existing->getId();
+                                }
+                                $same = ($exceptId !== null && $existingId === $exceptId);
+                                if (!$same) {
+                                    $errors[$field][] = 'Email ya registrado';
+                                }
                             }
-
                         }
-                        $ruleParts = explode(':', $rule);  // ['unique', 'id=123']
-                        $exceptId = null;
-                        if (count($ruleParts) > 1 && strpos($ruleParts[1], 'id=') === 0) {
-                            $exceptId = (int)substr($ruleParts[1], 3);  // Extrae 123
-                        }
-                        $existing = $this->repository->findByEmail($value);
-                        if ($existing && $existing->getId() !== $exceptId) {  // Skip si es el mismo ID
-                            $errors[$field][] = 'Email ya registrado';
-                        }
-
-                        break;
-                    case 'in:user,admin':  // ← FIX: Case específico para 'in' – no general 'in:'
-                        // Corta 'in:' → 'user,admin'
-                        $allowedStr = substr($rule, 3);  // 'user,admin'
-                        $allowed = array_map('trim', explode(',', $allowedStr));  // ['user', 'admin']
-                        if (!in_array($value, $allowed)) {
-                            $errors[$field][] = 'Rol inválido';
-                        }
-                        break;
-                    case 'match:':  // ← Tu case intacto
-                        $targetField = explode(':', $rule)[1];
-                        $targetValue = trim($data[$targetField] ?? '');
-                        if ($value !== $targetValue) {
-                            $fieldName = ucfirst(str_replace('_', ' ', $field));
-                            $targetName = ucfirst(str_replace('_', ' ', $targetField));
-                            $errors[$field][] = $fieldName . ' no coincide con ' . $targetName;
-                        }
-                        // Bidireccional...
-                        if (isset($rules[$targetField]) && in_array("match:$field", $rules[$targetField])) {
-                            // Ya chequeado, OK
-                        }
-                        break;
-                    default:
-                        error_log("Regla desconocida: $rule para campo $field");
-                        break;
+                    }
+                    continue;
                 }
+
+                error_log("Regla desconocida: {$rule} para campo {$field}");
             }
         }
 
         return $errors;
+    }
+
+    private static function label(string $field): string
+    {
+        return ucfirst(str_replace('_', ' ', $field));
     }
 }

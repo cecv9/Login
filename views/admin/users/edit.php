@@ -37,6 +37,8 @@ if (is_file($navbar)) {
 
     <form class="admin-form" method="POST" action="/admin/users/update">  <!-- ← FIX: Action estática -->
         <input type="hidden" name="id" value="<?= htmlspecialchars((string)$user->getId()) ?>">  <!-- ← FIX: Hidden ID para controller -->
+
+
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
 
         <div class="form-group">

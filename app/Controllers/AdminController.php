@@ -2,6 +2,13 @@
 
 namespace Enoc\Login\Controllers;
 
+use Enoc\Login\Http\Forms\UpdateUserForm;
+use Enoc\Login\Dto\UpdateUserDTO;
+use Enoc\Login\Core\LogManager;
+use Enoc\Login\Http\Forms\CreateUserForm;
+use Enoc\Login\Services\UserService;
+use Enoc\Login\Services\Exceptions\EmailAlreadyExists;
+use Enoc\Login\Services\Exceptions\ValidationException;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Repository\UsuarioRepository;
 use Enoc\Login\models\Users;
@@ -14,8 +21,15 @@ class AdminController extends BaseController
 
     public function __construct(PdoConnection $pdoConnection)
     {
+        $pdo = $pdoConnection->getPdo();
         $this->repository = new UsuarioRepository($pdoConnection);
+        $this->userService = new UserService($this->repository);
 
+        // Verificación adicional de seguridad
+        if (empty($_SESSION['user_id']) || ($_SESSION['user_role'] ?? 'user') !== 'admin') {
+            header('Location: /login');
+            exit('Unauthorized access');
+        }
 
     }
 
@@ -85,8 +99,7 @@ class AdminController extends BaseController
     }
 
     // Store (POST create)
-    public function store(): string
-    {
+    public function store(): string {
         // CSRF igual...
         $submittedToken = $_POST['csrf_token'] ?? null;
         if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
@@ -94,52 +107,57 @@ class AdminController extends BaseController
             return $this->redirect('/admin/users/create');
         }
 
-        // Extrae datos (trim ya en trait)
-        $name = $_POST['name'] ?? '';
-        $email = strtolower($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $confirm_password = $_POST['confirm_password'] ?? '';  // ← FIX: snake_case
-        $role = trim($_POST['role'] ?? '');  // ← FIX: Trim primero, sin default aquí (default en form)
-        if (empty($role)) $role = 'user';  // ← Default solo si vacío post-trim
-        // ← LIMPIO: Solo trait – define reglas una vez
-        $rules = [
-            'name' => ['required', 'min:2'],
-            'email' => ['required', 'email', 'unique'],  // Pre-repo chequeo duplicado
-            'password' => ['required', 'min:6'],
-            'confirm_password' => ['required', 'min:6', 'match:password'],  // Bidireccional en trait
-            'role' => ['required', 'in:user,admin']
-        ];
 
-        $data = compact('name', 'email', 'password', 'confirm_password', 'role');  // ← FIX: Keys consistentes
-        $errors = $this->validateUserData($data, $rules);
+        // 1) Form (usa tu trait vía CreateUserForm)
+        $form   = new CreateUserForm($_POST, $this->repository);
+        $result = $form->handle();
 
-        if (!empty($errors)) {
-            $_SESSION['errors'] = $errors;  // Por campo para UX
-            // Prefill (solo campos no erróneos, pero simple: todos)
-            $_SESSION['input_name'] = $name;
-            $_SESSION['input_email'] = $email;
+        if (isset($result['errors'])) {
+            $_SESSION['errors']      = $result['errors'];
+            $_SESSION['input_name']  = $_POST['name']  ?? '';
+            $_SESSION['input_email'] = strtolower($_POST['email'] ?? '');
             return $this->redirect('/admin/users/create');
         }
 
-        // Repo (sin validación extra – trait ya hizo 'unique')
-        $userId = $this->repository->createUser($email, $name, $password, $role);
+        $dto = $result['dto'];
 
-        if (!$userId) {
-        $_SESSION['error'] = 'Error interno …';
-        $_SESSION['input_name']  = $name;
-        $_SESSION['input_email'] = $email;
-        return $this->redirect('/admin/users/create');
-    }
+        // 2) Autorización defensiva para admin
+        if ($dto->role === 'admin' && (($_SESSION['user_role'] ?? 'user') !== 'admin')) {
+            $_SESSION['error']       = 'No autorizado para crear administradores.';
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect('/admin/users/create');
+        }
 
-        $_SESSION['success'] = 'Usuario creado exitosamente';
-        unset($_SESSION['input_name'], $_SESSION['input_email']);
-        $this->rotateCsrf();
-        return $this->redirect('/admin/users');
+        // 3) Service
+        try {
+            $userId = $this->userService->create($dto);
+            $_SESSION['success'] = 'Usuario creado exitosamente (#'.$userId.')';
+            unset($_SESSION['input_name'], $_SESSION['input_email']);
+            $this->rotateCsrf();
+            return $this->redirect('/admin/users');
+        } catch (ValidationException $e) {
+            $_SESSION['errors']      = $e->errors;
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect('/admin/users/create');
+        } catch (EmailAlreadyExists $e) {
+            $_SESSION['errors']      = ['email' => 'Ese email ya está registrado.'];
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect('/admin/users/create');
+        } catch (\Throwable $e) {
+            LogManager::error('AdminController::store error: '.$e->getMessage());
+            $_SESSION['error']       = 'Error interno…';
+            $_SESSION['input_name']  = $dto->name ?? ($_POST['name'] ?? '');
+            $_SESSION['input_email'] = $dto->email ?? (strtolower($_POST['email'] ?? ''));
+            return $this->redirect('/admin/users/create');
+        }
+
     }
 
     // Form edit
-    public function edit(): string
-    {
+    public function edit(): string {
         $id = (int)($_GET['id'] ?? 0);
         $user = $this->repository->findById($id);
         if (!$user) return $this->redirect('/admin/users');  // 404 simple
@@ -149,51 +167,69 @@ class AdminController extends BaseController
         return $this->view('admin.users.edit', [
             'title' => 'admin - Editar Usuario',
             'user' => $user,
-            'csrfToken' => $this->generateCsrfToken()
+            'csrfToken' => $this->generateCsrfToken(),
+            'error' => $error,
+            'success' => $success
         ]);
     }
 
     // Update (POST)
     public function update(): string {
         // CSRF + validaciones similares a store
+        // CSRF
+        $submittedToken = $_POST['csrf_token'] ?? null;
+        if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
+            $_SESSION['error'] = 'Token inválido';
+            return $this->redirect('/admin/users');
+        }
+
+        // Form (valida + normaliza + arma DTO)
+        $form = new UpdateUserForm($_POST, $this->repository);
+        $result = $form->handle();
         $id = (int)($_POST['id'] ?? 0);
-        $name = trim($_POST['name'] ?? '');
-        $email = trim(strtolower($_POST['email'] ?? ''));
-        $password = $_POST['password'] ?? null;  // Opcional
-        $confirm_password = $_POST['confirm_password'] ?? '';
-        $role = $_POST['role'] ?? 'user';
 
-
-        // ← TRAIT: Reglas para update (password opcional, unique con ID)
-        $rules = [
-            'name' => ['required', 'min:2'],
-            'email' => ['required', 'email', "unique:id=$id"],  // ← Pasa ID para skip propio
-            'password' => ['min:6'],  // No required
-            'confirm_password' => ['min:6', 'match:password'],  // Solo si password no vacío
-            'role' => ['required', 'in:user,admin']
-        ];
-
-        $data = compact('name', 'email', 'password', 'confirm_password', 'role');
-        $errors = $this->validateUserData($data, $rules);
-
-        if (!empty($errors)) {
-            $_SESSION['errors'] = $errors;
-            $_SESSION['input_name'] = $name;
-            $_SESSION['input_email'] = $email;
-            return $this->redirect("/admin/users/edit?id=$id");  // Back a edit con prefill
+        if (isset($result['errors'])) {
+            $_SESSION['errors'] = $result['errors'];
+            $_SESSION['input_name']  = $_POST['name']  ?? '';
+            $_SESSION['input_email'] = strtolower($_POST['email'] ?? '');
+            return $this->redirect("/admin/users/edit?id={$id}");
         }
 
-        // Repo call (password null si vacío)
-        $success = $this->repository->updateUser($id, $name, $email, $password ?: null, $role);
+        /** @var UpdateUserDTO $dto */
+        $dto = $result['dto'];
 
-        if (!$success) {
-            $_SESSION['error'] = 'Error al actualizar';
-            return $this->redirect("/admin/users/edit?id=$id");
+        // Autorización extra: solo admin puede subir rol a admin
+        if ($dto->role === 'admin' && (($_SESSION['user_role'] ?? 'user') !== 'admin')) {
+            $_SESSION['error'] = 'No autorizado para asignar rol administrador.';
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect("/admin/users/edit?id={$dto->id}");
         }
 
-        $_SESSION['success'] = 'Usuario actualizado!';
-        $this->rotateCsrf();
-        return $this->redirect('/admin/users');
+        try {
+            $ok = $this->userService->update($dto);
+            if (!$ok) {
+                $_SESSION['error'] = 'Error al actualizar';
+                return $this->redirect("/admin/users/edit?id={$dto->id}");
+            }
+            $_SESSION['success'] = 'Usuario actualizado!';
+            $this->rotateCsrf();
+            return $this->redirect('/admin/users');
+        } catch (ValidationException $e) {
+            $_SESSION['errors'] = $e->errors;
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect("/admin/users/edit?id={$dto->id}");
+        } catch (EmailAlreadyExists $e) {
+            $_SESSION['errors'] = ['email' => 'Ese email ya está registrado.'];
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect("/admin/users/edit?id={$dto->id}");
+        } catch (\Throwable $e) {
+            LogManager::error('AdminController::update error: '.$e->getMessage());
+            $_SESSION['error'] = 'Error interno…';
+            return $this->redirect("/admin/users/edit?id={$dto->id}");
+        }
     }
 
     // Delete confirm
@@ -238,13 +274,14 @@ class AdminController extends BaseController
             return $this->redirect('/admin/users');
         }
 
-        if ($this->repository->deleteUser($id)) {  // Ya soft-delete
+        // Service soft-delete
+        if ($this->userService->delete($id)) {
             $_SESSION['success'] = 'Usuario borrado exitosamente';
             $this->rotateCsrf();
         } else {
             $_SESSION['error'] = 'Error al borrar usuario';
         }
 
-        return $this->redirect('/admin/users');  // Back a lista con flash
+        return $this->redirect('/admin/users');
     }
 }

@@ -117,59 +117,95 @@ class Router
     /**
      * Procesar la petición actual
      */
-    public function dispatch(string $requestUri, string $requestMethod): mixed {
-        // Limpiar query parameters y barras adicionales
-       // $uri = rtrim(parse_url($requestUri, PHP_URL_PATH), '/') ?: '/';
-
+    public function dispatch(string $requestUri, string $requestMethod): mixed
+    {
+        // 1) Normaliza path (sin query) y barra final
         $parsedPath = parse_url($requestUri, PHP_URL_PATH);
-
         if ($parsedPath === false) {
             return $this->notFound();
         }
-
         $path = $parsedPath ?? '';
-        $uri = rtrim($path, '/') ?: '/';
+        $uri  = rtrim($path, '/') ?: '/';
 
-        $normalizedMethod = strtoupper($requestMethod);
-        $routesForMethod = $this->routes[$normalizedMethod] ?? null;
-
-     // ← NUEVO: middleware pipeline (reemplaza protectRoute)
-        $middlewareKeys = $this->routeMiddleware[$normalizedMethod][$path] ?? [];
-        foreach ($middlewareKeys as $key) {
-            MiddlewareFactory::make($key)->handle();
-        } // lanza redirect o exit
-
-        // Buscar la ruta exacta
-        if (is_array($routesForMethod) && isset($routesForMethod[$uri])) {
-            return $this->executeHandler($routesForMethod[$uri]);
+        // 2) Override de método vía _method en POST (PUT/PATCH/DELETE)
+        $method = strtoupper($requestMethod);
+        if ($method === 'POST' && isset($_POST['_method'])) {
+            $override = strtoupper((string)$_POST['_method']);
+            if (in_array($override, ['PUT','PATCH','DELETE'], true)) {
+                $method = $override;
+            }
         }
 
-        $allowedMethods = $this->findAllowedMethods($uri);
+        // 3) HEAD → GET fallback
+        if ($method === 'HEAD') {
+            $method = 'GET';
+        }
 
+        $routesForMethod = $this->routes[$method] ?? null;
+
+        // 4) Pipeline de middlewares (ruta normalizada)
+        $middlewareKeys = $this->routeMiddleware[$method][$uri] ?? [];
+        foreach ($middlewareKeys as $key) {
+            MiddlewareFactory::make($key)->handle(); // puede redirigir o exit
+        }
+
+        // 5) Match exacto y ejecución segura
+        if (is_array($routesForMethod) && array_key_exists($uri, $routesForMethod)) {
+            try {
+                return $this->executeHandler($routesForMethod[$uri]);
+            } catch (\Throwable $e) {
+                \Enoc\Login\Core\LogManager::error('Router handler exception: '.$e->getMessage());
+                http_response_code(500);
+                header('Content-Type: text/plain; charset=utf-8');
+                return 'Lo sentimos, algo salió mal.';
+            }
+        }
+
+        // 6) OPTIONS automático: anuncia métodos permitidos para este URI
+        if ($requestMethod === 'OPTIONS') {
+            $allowed = $this->findAllowedMethods($uri);
+            if (!empty($allowed)) {
+                header('Allow: ' . implode(', ', $allowed));
+                return ''; // 204 implícito
+            }
+        }
+
+        // 7) 405 si existe la ruta con otros métodos
+        $allowedMethods = $this->findAllowedMethods($uri);
         if (!empty($allowedMethods)) {
             return $this->methodNotAllowed($allowedMethods);
         }
 
-        // Si no encuentra la ruta, error 404
+        // 8) 404
         return $this->notFound();
     }
+
 
     /**
      * Ejecutar el handler (closure o controlador)
      */
-    private function executeHandler(mixed $handler): mixed  {
-        // Si es una closure/función anónima
+    private function executeHandler(mixed $handler): mixed
+    {
+        // Closure/función
         if (is_callable($handler)) {
-            return \call_user_func($handler);
+            try {
+                return \call_user_func($handler);
+            } catch (\Throwable $e) {
+                \Enoc\Login\Core\LogManager::error('Route closure exception: '.$e->getMessage());
+                http_response_code(500);
+                header('Content-Type: text/plain; charset=utf-8');
+                return 'Lo sentimos, algo salió mal.';
+            }
         }
 
-        // Si es string con formato "Controller@method"
+        // "Controller@method"
         if (is_string($handler) && str_contains($handler, '@')) {
             return $this->executeControllerMethod($handler);
         }
 
         throw new \Exception("Handler inválido para la ruta");
     }
+
 
     /**
      * Ejecutar método de controlador

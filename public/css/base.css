@@ -1,0 +1,54 @@
+/* --- Reset y layout de página --- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body.page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    color: #333;
+    background: #f4f4f4;
+}
+
+/* El contenido crece y empuja el footer al fondo */
+.page-content { flex: 1 0 auto; }
+
+/* --- Navbar --- */
+.navbar { background: #2c3e50; color: #fff; }
+.nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 16px;
+}
+.brand { color: #ecf0f1; text-decoration: none; font-weight: bold; }
+.nav-links { list-style: none; display: flex; gap: 12px; margin: 0; padding: 0; }
+.nav-links a {
+    color: #ecf0f1; text-decoration: none;
+    padding: 8px 10px; border-radius: 6px;
+}
+.nav-links a:hover { background: #34495e; }
+.nav-links a.active { background: #3498db; }
+
+/* Zona derecha del navbar */
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.nav-right a { color: #ecf0f1; text-decoration: none; }
+.btn-logout {
+    background: #e74c3c; color: #fff; border: 0;
+    padding: 8px 12px; border-radius: 6px; cursor: pointer;
+}
+.btn-logout:hover { background: #c0392b; }
+
+/* --- Footer --- */
+.site-footer { background: #2c3e50; color: #bdc3c7; padding: 16px; margin-top: 24px; }
+.footer-inner {
+    max-width: 1200px; margin: 0 auto;
+    font-size: 0.95rem; display: flex; justify-content: space-between; gap: 12px;
+}
+.footer-links { display: flex; gap: 12px; }
+.footer-links a { color: #ecf0f1; text-decoration: none; }
+.footer-links a:hover { text-decoration: underline; }
+
+/* (Opcional) Navbar sticky */
+@media (min-width: 768px) {
+    .navbar { position: sticky; top: 0; z-index: 10; }
+}

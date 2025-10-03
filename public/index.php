@@ -6,6 +6,9 @@ use Enoc\Login\Core\LogManager;
 use Enoc\Login\Config\DatabaseConfig;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Core\DatabaseConnectionException;
+use Enoc\Login\Repository\UsuarioRepository;
+use Enoc\Login\Services\UserService;
+use Enoc\Login\Controllers\AdminController;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -93,6 +96,7 @@ $dbConfig = new DatabaseConfig(
 
 try {
     $connection = new PdoConnection($dbConfig);
+
 } catch (DatabaseConnectionException $e) {
     http_response_code(500);
     echo $appDebug

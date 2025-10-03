@@ -143,8 +143,10 @@ class AuthController extends BaseController{
             //exit('Invalid CSRF token');
         //}
         if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
-            http_response_code(400);
-            exit('Invalid CSRF token');
+            $_SESSION['error'] = 'Token de seguridad inválido. Por favor intente de nuevo.';
+            $this->redirect('/login');
+            return; // Nunca se ejecuta por el redirect, pero es buena práctica
+
         }
 
         if (session_status() === PHP_SESSION_ACTIVE) {
@@ -223,7 +225,7 @@ class AuthController extends BaseController{
         }
 
         // Repo (default role 'user')
-        $userId = $this->repository->createUser($email, $password, $name, 'user');  // ← Orden: email, pass, name, role (ajusta si signature diferente)
+        $userId = $this->repository->createUser($name, $email,$password , 'user');  // ← Orden: email, pass, name, role (ajusta si signature diferente)
 
         if ($userId) {
             $_SESSION['register_success'] = 'Usuario creado exitosamente. <a href="/login">Inicia sesión</a>';
