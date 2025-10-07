@@ -8,15 +8,6 @@
 <body>
 
 <?php
-$navbar = dirname(__DIR__, 2) . '/partials/navbar.php';
-if (is_file($navbar)) {
-    include $navbar;
-} else {
-    error_log("Navbar no encontrado en: {$navbar}");
-    // echo "<!-- navbar missing -->";
-}
-?>
-<?php
 /** @var int $afterId */
 /** @var Users[] $users */
 ?>
@@ -25,6 +16,13 @@ if (is_file($navbar)) {
 
     <h1>Usuarios</h1>
     <a href="/admin/users/create">Crear Nuevo</a>
+    <a href="/admin/audit">← Panel de Auditoria</a>
+    <form action="/logout" method="POST">
+        <?php if (!empty($csrfToken)): ?>
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+        <?php endif; ?>
+        <button type="submit" class="btn-logout">Cerrar sesión</button>
+    </form>
     <?php if (isset($_SESSION['success'])): ?>
         <div class="success"><?= $_SESSION['success'] ?></div>
         <?php unset($_SESSION['success']); ?>

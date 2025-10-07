@@ -56,6 +56,10 @@ if (is_file($navbar)) {
             <select id="role" name="role" required>  <!-- ← NUEVO: Select para rol -->
                 <option value="user" <?= $user->getRole() === 'user' ? 'selected' : '' ?>>User</option>
                 <option value="admin" <?= $user->getRole() === 'admin' ? 'selected' : '' ?>>Admin</option>
+                <option value="facturador" <?= $user->getRole() === 'facturador' ? 'selected' : '' ?>>Facturador</option>
+                <option value="bodeguero" <?= $user->getRole() === 'bodeguero' ? 'selected' : '' ?>>Bodeguero</option>
+                <option value="liquidador" <?= $user->getRole() === 'liquidador' ? 'selected' : '' ?>>Liquidador</option>
+                <option value="vendedor_sistema" <?= $user->getRole() === 'vendedor_sistema' ? 'selected' : '' ?>>Vendedor con acceso al sistema</option>
             </select>
         </div>
 

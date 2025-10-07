@@ -1,7 +1,0 @@
-[2025-10-02 03:00:13] [ERROR] AdminController::store error: Call to a member function create() on null
-[2025-10-02 03:27:18] [ERROR] Unhandled exception: Class "Enoc\Login\Services\UserService" not found
-#0 /home/enoc/Login/app/Core/Router.php(185): Enoc\Login\Controllers\AdminController->__construct()
-#1 /home/enoc/Login/app/Core/Router.php(168): Enoc\Login\Core\Router->executeControllerMethod()
-#2 /home/enoc/Login/app/Core/Router.php(144): Enoc\Login\Core\Router->executeHandler()
-#3 /home/enoc/Login/public/index.php(229): Enoc\Login\Core\Router->dispatch()
-#4 {main}

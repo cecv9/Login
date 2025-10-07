@@ -8,6 +8,7 @@ use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Repository\UsuarioRepository;
 use Enoc\Login\models\Users;
 use Enoc\Login\Traits\ValidatorTrait;
+use Enoc\Login\Core\LogManager;
 
 
 
@@ -38,8 +39,7 @@ class AuthController extends BaseController{
     /**
      * Procesar login
      */
-    public function processLogin(): string
-    {
+    public function processLogin(): string {
         // Limpiar errores anteriores
         unset($_SESSION['error']);
 

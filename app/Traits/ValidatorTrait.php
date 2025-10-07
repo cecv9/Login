@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Enoc\Login\Traits;
 
+use Enoc\Login\Enums\UserRole;  // ← Sin 'S'
+
 trait ValidatorTrait
 {
     private function validateUserData(array $data, array $rules): array
@@ -45,7 +47,11 @@ trait ValidatorTrait
                     continue;
                 }
                 if (str_starts_with($rule, 'in:')) {
-                    $allowed = array_map('trim', explode(',', substr($rule, 3)));
+                    if ($field === 'role') {
+                        $allowed = UserRole::all();  // ← Sin 'S'
+                    } else {
+                        $allowed = array_map('trim', explode(',', substr($rule, 3)));
+                    }
                     if (!in_array($value, $allowed, true)) {
                         $errors[$field][] = self::label($field) . ' inválido';
                     }
@@ -62,7 +68,7 @@ trait ValidatorTrait
                 if ($rule === 'unique' || str_starts_with($rule, 'unique:')) {
                     $exceptId = null;
                     if (str_starts_with($rule, 'unique:')) {
-                        $after = substr($rule, 7); // ej. 'id=123'
+                        $after = substr($rule, 7);
                         if (str_starts_with($after, 'id=')) {
                             $exceptId = (int)substr($after, 3);
                         }
@@ -86,8 +92,6 @@ trait ValidatorTrait
                     }
                     continue;
                 }
-
-                error_log("Regla desconocida: {$rule} para campo {$field}");
             }
         }
 

@@ -4,6 +4,7 @@ namespace Enoc\Login\Core;
 
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Middleware\MiddlewareFactory;
+;
 
 class Router
 {
@@ -154,7 +155,7 @@ class Router
             try {
                 return $this->executeHandler($routesForMethod[$uri]);
             } catch (\Throwable $e) {
-                \Enoc\Login\Core\LogManager::error('Router handler exception: '.$e->getMessage());
+                \Enoc\Login\Core\LogManager::logError('Router handler exception: '.$e->getMessage());
                 http_response_code(500);
                 header('Content-Type: text/plain; charset=utf-8');
                 return 'Lo sentimos, algo salió mal.';
@@ -191,7 +192,7 @@ class Router
             try {
                 return \call_user_func($handler);
             } catch (\Throwable $e) {
-                \Enoc\Login\Core\LogManager::error('Route closure exception: '.$e->getMessage());
+                \Enoc\Login\Core\LogManager::logError('Route closure exception: '.$e->getMessage());
                 http_response_code(500);
                 header('Content-Type: text/plain; charset=utf-8');
                 return 'Lo sentimos, algo salió mal.';

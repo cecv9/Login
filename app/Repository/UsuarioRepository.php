@@ -62,7 +62,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return $row ? $this->hydrateUser($row) : null;
         } catch (PDOException $e) {
-            LogManager::error('Error al buscar usuario por ID: ' . $e->getMessage());
+            LogManager::logError('Error al buscar usuario por ID: ' . $e->getMessage());
             return null;
         }
     }
@@ -126,7 +126,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return $row ? $this->hydrateUser($row) : null;
         } catch (PDOException $e) {
-            LogManager::error('Error al buscar usuario por email: ' . $e->getMessage());
+            LogManager::logError('Error al buscar usuario por email: ' . $e->getMessage());
             return null;
         }
     }
@@ -140,7 +140,7 @@ class UsuarioRepository implements UserRepositoryInterface
     ): bool {
         $email = strtolower(trim($email));
         $name  = trim($name);
-        $role  = in_array($role, ['user','admin'], true) ? $role : 'user';
+        $role  = in_array($role, ['admin','facturador', 'bodeguero', 'liquidador', 'vendedor_sistema'], true) ? $role : 'user';
 
         try {
             if ($password_hash === null) {
@@ -177,7 +177,7 @@ class UsuarioRepository implements UserRepositoryInterface
             // rowCount puede ser 0 si no cambió nada; lo tomamos como éxito
             return $ok;
         } catch (PDOException $e) {
-            LogManager::error('Error actualizando user (hashed): ' . $e->getMessage());
+            LogManager::logError('Error actualizando user (hashed): ' . $e->getMessage());
             return false;
         }
     }
@@ -201,7 +201,7 @@ class UsuarioRepository implements UserRepositoryInterface
             mb_strlen($plain) < 6 ||
             !in_array($role, ['user','admin'], true)
         ) {
-            LogManager::error('Registro falló: Validación input inválida (repo wrapper).');
+            LogManager::logError('Registro falló: Validación input inválida (repo wrapper).');
             return null;
         }
 
@@ -227,9 +227,9 @@ class UsuarioRepository implements UserRepositoryInterface
 
         if (!filter_var($cleanEmail, FILTER_VALIDATE_EMAIL) ||
             $hash === '' ||
-            !in_array($role, ['user','admin'], true)
+            !in_array($role, ['facturador', 'bodeguero', 'liquidador', 'vendedor_sistema'], true)
         ) {
-            LogManager::error('Registro falló: Datos inválidos en createUserHashed.');
+            LogManager::logError('Registro falló: Datos inválidos en createUserHashed.');
             return null;
         }
 
@@ -248,7 +248,7 @@ class UsuarioRepository implements UserRepositoryInterface
 
             return (int) $this->pdo->lastInsertId();
         } catch (PDOException $e) {
-            LogManager::error('Error al crear usuario (Hashed): ' . $e->getMessage());
+            LogManager::logError('Error al crear usuario (Hashed): ' . $e->getMessage());
             return null; // Si prefieres: throw; y que lo maneje el Service
         }
     }
@@ -294,7 +294,7 @@ class UsuarioRepository implements UserRepositoryInterface
             }
             return $users;
         } catch (PDOException $e) {
-            LogManager::error('Error paginando: ' . $e->getMessage());
+            LogManager::logError('Error paginando: ' . $e->getMessage());
             return [];
         }
     }
@@ -331,7 +331,7 @@ class UsuarioRepository implements UserRepositoryInterface
             }
             return $users;
         } catch (\PDOException $e) {
-            LogManager::error('Error paginando (before): ' . $e->getMessage());
+            LogManager::logError('Error paginando (before): ' . $e->getMessage());
             return [];
         }
     }
@@ -350,7 +350,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt->execute();
             return (bool)$stmt->fetchColumn();
         } catch (\PDOException $e) {
-            LogManager::error('Error en hasMoreOlder: ' . $e->getMessage());
+            LogManager::logError('Error en hasMoreOlder: ' . $e->getMessage());
             return false;
         }
     }
@@ -373,7 +373,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt->execute();
             return (bool)$stmt->fetchColumn();
         } catch (\PDOException $e) {
-            LogManager::error('Error en hasMoreNewer: ' . $e->getMessage());
+            LogManager::logError('Error en hasMoreNewer: ' . $e->getMessage());
             return false;
         }
     }
@@ -423,7 +423,7 @@ class UsuarioRepository implements UserRepositoryInterface
             return $users;
 
         } catch (PDOException $e) {
-            LogManager::error('Error listando users: ' . $e->getMessage());
+            LogManager::logError('Error listando users: ' . $e->getMessage());
             return [];
         }
     }
@@ -443,7 +443,7 @@ class UsuarioRepository implements UserRepositoryInterface
            // }
             return $count;
         } catch (PDOException $e) {
-            LogManager::error('Error contando users: ' . $e->getMessage());
+            LogManager::logError('Error contando users: ' . $e->getMessage());
             return 0;
         }
     }
@@ -467,7 +467,7 @@ class UsuarioRepository implements UserRepositoryInterface
 
             return $this->updateUserHashed($id, $name, $email, $hash, $role);
         } catch (PDOException $e) {
-            LogManager::error('Error actualizando user: ' . $e->getMessage());
+            LogManager::logError('Error actualizando user: ' . $e->getMessage());
             return false;
         }
     }
@@ -477,7 +477,7 @@ class UsuarioRepository implements UserRepositoryInterface
             $stmt = $this->pdo->prepare('UPDATE users SET role = :role WHERE id = :id');
             return $stmt->execute(['role' => $role, 'id' => $id]) && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            LogManager::error('Error actualizando role: ' . $e->getMessage());
+            LogManager::logError('Error actualizando role: ' . $e->getMessage());
             return false;
         }
     }
@@ -490,7 +490,7 @@ class UsuarioRepository implements UserRepositoryInterface
             );
             return $stmt->execute(['id' => $id]) && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
-            LogManager::error('Error soft-deleting user: ' . $e->getMessage());
+            LogManager::logError('Error soft-deleting user: ' . $e->getMessage());
             return false;
         }
     }

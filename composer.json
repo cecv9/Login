@@ -2,7 +2,9 @@
   "name": "enoc/login",
   "description": "Sistema de login con PHP y MySQL",
   "require": {
-    "vlucas/phpdotenv": "^5.6"
+    "vlucas/phpdotenv": "^5.6",
+    "psr/log": "^3.0",
+    "monolog/monolog": "^3.9"
   },
   "license": "mit",
   "autoload": {

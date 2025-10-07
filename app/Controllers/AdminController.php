@@ -13,7 +13,7 @@ use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Repository\UsuarioRepository;
 use Enoc\Login\models\Users;
 use Enoc\Login\Traits\ValidatorTrait;
-
+use Enoc\Login\Enums\UserRole;
 class AdminController extends BaseController
 {
     private UsuarioRepository $repository;
@@ -94,66 +94,84 @@ class AdminController extends BaseController
             'error' => $error,
             'success' => $success,
             'name' => $name,  // Prefill
-            'email' => $email // Prefill
+            'email' => $email, // Prefill
+            'availableRoles' => UserRole::withLabels() // ← Controller prepara los datos
         ]);
     }
 
     // Store (POST create)
+    /**
+     * Crear nuevo usuario
+     */
     public function store(): string {
-        // CSRF igual...
+        // 1. Validación CSRF
         $submittedToken = $_POST['csrf_token'] ?? null;
         if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
+            $this->logger->warning('Intento de crear usuario con token CSRF inválido', [
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+            ]);
             $_SESSION['error'] = 'Token inválido';
             return $this->redirect('/admin/users/create');
         }
 
-
-        // 1) Form (usa tu trait vía CreateUserForm)
-        $form   = new CreateUserForm($_POST, $this->repository);
+        // 2. Validación sintáctica
+        $form = new CreateUserForm($_POST);
         $result = $form->handle();
 
         if (isset($result['errors'])) {
-            $_SESSION['errors']      = $result['errors'];
-            $_SESSION['input_name']  = $_POST['name']  ?? '';
+            $_SESSION['errors'] = $result['errors'];
+            $_SESSION['input_name']  = $_POST['name'] ?? '';
             $_SESSION['input_email'] = strtolower($_POST['email'] ?? '');
             return $this->redirect('/admin/users/create');
         }
 
+        /** @var CreateUserDTO $dto */
         $dto = $result['dto'];
 
-        // 2) Autorización defensiva para admin
-        if ($dto->role === 'admin' && (($_SESSION['user_role'] ?? 'user') !== 'admin')) {
-            $_SESSION['error']       = 'No autorizado para crear administradores.';
-            $_SESSION['input_name']  = $dto->name;
-            $_SESSION['input_email'] = $dto->email;
-            return $this->redirect('/admin/users/create');
+        // 3. Crear contexto de auditoría
+        $audit = AuditContext::fromSession();
+
+        // 4. Autorización: Solo admin puede crear admins
+        if ($dto->role === 'admin') {
+            $currentUserRole = $_SESSION['user_role'] ?? null; // ⭐ Mejora
+
+            if ($currentUserRole !== 'admin') {
+                $this->logger->warning('Usuario sin permisos intentó crear administrador', [
+                    'target_email' => $dto->email,
+                    'attempted_role' => $dto->role,
+                    ...$audit->toArray()
+                ]);
+                $_SESSION['error'] = 'No tienes permisos para crear administradores';
+                return $this->redirect('/admin/users/create');
+            }
         }
 
-        // 3) Service
+        // 5. Crear usuario (con auditoría automática en el Service)
         try {
-            $userId = $this->userService->create($dto);
-            $_SESSION['success'] = 'Usuario creado exitosamente (#'.$userId.')';
-            unset($_SESSION['input_name'], $_SESSION['input_email']);
+            $userId = $this->userService->create($dto, $audit);
+
+            $_SESSION['success'] = 'Usuario creado correctamente';
             $this->rotateCsrf();
             return $this->redirect('/admin/users');
-        } catch (ValidationException $e) {
-            $_SESSION['errors']      = $e->errors;
-            $_SESSION['input_name']  = $dto->name;
-            $_SESSION['input_email'] = $dto->email;
-            return $this->redirect('/admin/users/create');
+
         } catch (EmailAlreadyExists $e) {
-            $_SESSION['errors']      = ['email' => 'Ese email ya está registrado.'];
-            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['errors'] = ['email' => ['Ese email ya está registrado']];
+            $_SESSION['input_name'] = $dto->name;
             $_SESSION['input_email'] = $dto->email;
             return $this->redirect('/admin/users/create');
+
+        } catch (ValidationException $e) {
+            $_SESSION['errors'] = $e->errors;
+            $_SESSION['input_name'] = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect('/admin/users/create');
+
         } catch (\Throwable $e) {
-            LogManager::error('AdminController::store error: '.$e->getMessage());
-            $_SESSION['error']       = 'Error interno…';
-            $_SESSION['input_name']  = $dto->name ?? ($_POST['name'] ?? '');
-            $_SESSION['input_email'] = $dto->email ?? (strtolower($_POST['email'] ?? ''));
+            // ✅ El Service ya logueó el error detallado con contexto
+            $_SESSION['error'] = 'Error interno del servidor';
             return $this->redirect('/admin/users/create');
         }
-
     }
 
     // Form edit
@@ -169,26 +187,29 @@ class AdminController extends BaseController
             'user' => $user,
             'csrfToken' => $this->generateCsrfToken(),
             'error' => $error,
-            'success' => $success
+            'success' => $success,
+            'availableRoles' => UserRole::withLabels(),  // ← También aquí
         ]);
     }
 
     // Update (POST)
+
+// En AdminController.php
+
     public function update(): string {
-        // CSRF + validaciones similares a store
-        // CSRF
+        // 1️⃣ VALIDACIÓN DE SEGURIDAD: CSRF
         $submittedToken = $_POST['csrf_token'] ?? null;
         if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
             $_SESSION['error'] = 'Token inválido';
             return $this->redirect('/admin/users');
         }
 
-        // Form (valida + normaliza + arma DTO)
-        $form = new UpdateUserForm($_POST, $this->repository);
+        // 2️⃣ VALIDACIÓN SINTÁCTICA: Form (sin Repository)
+        $form = new UpdateUserForm($_POST);
         $result = $form->handle();
-        $id = (int)($_POST['id'] ?? 0);
 
         if (isset($result['errors'])) {
+            $id = (int)($_POST['id'] ?? 0);
             $_SESSION['errors'] = $result['errors'];
             $_SESSION['input_name']  = $_POST['name']  ?? '';
             $_SESSION['input_email'] = strtolower($_POST['email'] ?? '');
@@ -198,40 +219,46 @@ class AdminController extends BaseController
         /** @var UpdateUserDTO $dto */
         $dto = $result['dto'];
 
-        // Autorización extra: solo admin puede subir rol a admin
-        if ($dto->role === 'admin' && (($_SESSION['user_role'] ?? 'user') !== 'admin')) {
-            $_SESSION['error'] = 'No autorizado para asignar rol administrador.';
+        // 3️⃣ VALIDACIÓN DE AUTORIZACIÓN: Permisos de rol
+        $currentUserRole = $_SESSION['user_role'] ?? 'user';
+        if ($dto->role === 'admin' && $currentUserRole !== 'admin') {
+            $_SESSION['error'] = 'No autorizado para asignar rol administrador';
             $_SESSION['input_name']  = $dto->name;
             $_SESSION['input_email'] = $dto->email;
             return $this->redirect("/admin/users/edit?id={$dto->id}");
         }
 
+        // 4️⃣ VALIDACIÓN DE NEGOCIO + PERSISTENCIA: Service
         try {
             $ok = $this->userService->update($dto);
+
             if (!$ok) {
-                $_SESSION['error'] = 'Error al actualizar';
+                $_SESSION['error'] = 'Error al actualizar usuario';
                 return $this->redirect("/admin/users/edit?id={$dto->id}");
             }
-            $_SESSION['success'] = 'Usuario actualizado!';
+
+            $_SESSION['success'] = 'Usuario actualizado correctamente';
             $this->rotateCsrf();
             return $this->redirect('/admin/users');
+
+        } catch (EmailAlreadyExists $e) {
+            $_SESSION['errors'] = ['email' => ['Ese email ya está registrado']];
+            $_SESSION['input_name']  = $dto->name;
+            $_SESSION['input_email'] = $dto->email;
+            return $this->redirect("/admin/users/edit?id={$dto->id}");
+
         } catch (ValidationException $e) {
             $_SESSION['errors'] = $e->errors;
             $_SESSION['input_name']  = $dto->name;
             $_SESSION['input_email'] = $dto->email;
             return $this->redirect("/admin/users/edit?id={$dto->id}");
-        } catch (EmailAlreadyExists $e) {
-            $_SESSION['errors'] = ['email' => 'Ese email ya está registrado.'];
-            $_SESSION['input_name']  = $dto->name;
-            $_SESSION['input_email'] = $dto->email;
-            return $this->redirect("/admin/users/edit?id={$dto->id}");
+
         } catch (\Throwable $e) {
-            LogManager::error('AdminController::update error: '.$e->getMessage());
-            $_SESSION['error'] = 'Error interno…';
+            LogManager::logError('AdminController::update error: ' . $e->getMessage());
+            $_SESSION['error'] = 'Error interno del servidor';
             return $this->redirect("/admin/users/edit?id={$dto->id}");
         }
     }
-
     // Delete confirm
     public function delete(): string
     {

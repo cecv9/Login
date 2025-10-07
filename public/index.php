@@ -20,8 +20,8 @@ $rootPath = dirname(__DIR__);
 Dotenv::createImmutable($rootPath)->safeLoad();
 
 // Inicializar LogManager
-LogManager::init();
-LogManager::info('Aplicación iniciada');
+//LogManager::init();
+LogManager::logInfo('Aplicación iniciada');
 
 /*****************************************************************
  * 2) Modo debug / errores + seguridad de producción
@@ -33,7 +33,7 @@ if ($appDebug && php_sapi_name() !== 'cli') {
     http_response_code(500);
     header('Content-Type: text/plain');
     echo "Internal Server Error\n";
-    LogManager::error('APP_DEBUG=true en producción. Apágalo.');
+    LogManager::logError('APP_DEBUG=true en producción. Apágalo.');
     exit;
 }
 
@@ -220,7 +220,11 @@ try {
     $router->middleware('GET',  '/admin/users/create',   ['auth', 'role:admin']);
     $router->middleware('POST', '/admin/users/update',   ['auth', 'role:admin']);
     $router->middleware('POST', '/admin/users/delete',   ['auth', 'role:admin']);
-
+    // Rutas de auditoría - todas requieren autenticación y rol admin
+    $router->middleware('GET',  '/admin/audit',          ['auth', 'role:admin']);
+    $router->middleware('GET',  '/admin/audit/export',   ['auth', 'role:admin']);
+    $router->middleware('GET',  '/admin/audit/user',     ['auth', 'role:admin']);
+    $router->middleware('GET',  '/admin/audit/history',  ['auth', 'role:admin']);
 
     // Procesar petición actual
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -236,7 +240,7 @@ try {
     header('Referrer-Policy: no-referrer');
 
     // Log interno
-    LogManager::error('Unhandled exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+    LogManager::logError('Unhandled exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
 
     if ($appDebug && php_sapi_name() !== 'cli') {
         echo '<h1>Error 500</h1>';

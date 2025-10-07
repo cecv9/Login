@@ -15,6 +15,7 @@ if (is_file($navbarPath)) {
 }
 ?>
 
+
 <div class="admin-container">
     <h1>Crear Nuevo Usuario</h1>
     <a href="/admin/users">← Volver a Lista</a>
@@ -60,9 +61,12 @@ if (is_file($navbarPath)) {
 
         <div class="form-group <?= isset($_SESSION['errors']['role']) ? 'has-error' : '' ?>">
             <label for="role">Rol:</label>
-            <select id="role" name="role" required>  <!-- Required fuerza elección -->
-                <option value="user" selected>User</option>  <!-- ← FIX: selected default = 'user' siempre -->
-                <option value="admin">Admin</option>
+            <select id="role" name="role" required>
+                <?php foreach ($availableRoles as $value => $label): ?>  <!-- ← Vista solo itera datos -->
+                    <option value="<?= htmlspecialchars($value) ?>">
+                        <?= htmlspecialchars($label) ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
             <?php if (isset($_SESSION['errors']['role'])): ?>
                 <small class="error-text"><?= htmlspecialchars(end($_SESSION['errors']['role'])) ?></small>  <!-- Muestra "Rol inválido" o "requerido" -->

@@ -35,7 +35,7 @@
 
 
         <button type="submit">Iniciar Sesión</button>
-        <p>¿Ya tienes cuenta? <a href="/register">Registrarse</a></p>
+       /** <p>¿Ya tienes cuenta? <a href="/register">Registrarse</a></p>
     </form>
 </div>
 

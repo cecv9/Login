@@ -1,6 +1,0 @@
-[2025-10-01 02:39:16] [ERROR] Unhandled exception: Call to undefined method Enoc\Login\Repository\UsuarioRepository::findPageBefore()
-#0 /home/enoc/Login/app/Core/Router.php(191): Enoc\Login\Controllers\AdminController->index()
-#1 /home/enoc/Login/app/Core/Router.php(168): Enoc\Login\Core\Router->executeControllerMethod()
-#2 /home/enoc/Login/app/Core/Router.php(144): Enoc\Login\Core\Router->executeHandler()
-#3 /home/enoc/Login/public/index.php(225): Enoc\Login\Core\Router->dispatch()
-#4 {main}

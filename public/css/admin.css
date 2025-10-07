@@ -40,7 +40,16 @@ a[href="/admin/users/create"] {
     margin-bottom: 20px;
     transition: background 0.3s ease; /* Suave cambio al hover. */
 }
-
+a[href="/admin/audit"] {
+    display: inline-block;
+    background: #3498db; /* Azul brillante para acciones positivas. */
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    transition: background 0.3s ease; /* Suave cambio al hover. */
+}
 a[href="/admin/users/create"]:hover {
     background: #2980b9;
 }
