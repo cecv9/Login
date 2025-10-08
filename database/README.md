@@ -4,10 +4,31 @@ This directory contains SQL migration files for the Login application.
 
 ## Running Migrations
 
-To apply migrations to your database, run the SQL files in order:
+### Option 1: Using the Migration Script (Recommended)
+
+The easiest way to apply migrations:
 
 ```bash
-# Example using mysql command line
+# Apply all pending migrations
+php database/migrate.php
+
+# Apply a specific migration
+php database/migrate.php 001
+
+# List available migrations
+php database/migrate.php --list
+```
+
+The script will:
+- Track which migrations have been applied
+- Skip already-applied migrations
+- Show clear progress and errors
+- Create a `migrations` table to track state
+
+### Option 2: Manual SQL Execution
+
+```bash
+# Using mysql command line
 mysql -u your_username -p your_database < migrations/001_create_login_attempts_table.sql
 ```
 
