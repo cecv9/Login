@@ -1,0 +1,12 @@
+[2025-10-08 03:23:43] ERROR CREAR USUARIO
+Mensaje: Class "Enoc\Login\Repository\UserRole" not found
+Archivo: /home/enoc/Login/app/Repository/UsuarioRepository.php:242
+Trace:
+#0 /home/enoc/Login/app/Services/UserService.php(87): Enoc\Login\Repository\UsuarioRepository->createUserHashed()
+#1 /home/enoc/Login/app/Controllers/AdminController.php(337): Enoc\Login\Services\UserService->create()
+#2 /home/enoc/Login/app/Core/Router.php(228): Enoc\Login\Controllers\AdminController->store()
+#3 /home/enoc/Login/app/Core/Router.php(204): Enoc\Login\Core\Router->executeControllerMethod()
+#4 /home/enoc/Login/app/Core/Router.php(156): Enoc\Login\Core\Router->executeHandler()
+#5 /home/enoc/Login/public/index.php(242): Enoc\Login\Core\Router->dispatch()
+#6 {main}
+

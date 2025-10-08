@@ -6,6 +6,7 @@ namespace Enoc\Login\Repository;
 use Enoc\Login\Core\LogManager;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\models\Users;
+use Enoc\Login\Enums\UserRole;
 use PDO;
 use PDOException;
 
@@ -56,6 +57,7 @@ class UsuarioRepository implements UserRepositoryInterface
                 'SELECT id, email, name, role, password_hash, deleted_at
                FROM users
               WHERE id = :id
+                AND deleted_at IS NULL
               LIMIT 1'
             );
             $stmt->execute(['id' => $id]);
@@ -131,6 +133,10 @@ class UsuarioRepository implements UserRepositoryInterface
         }
     }
 
+    /**
+     * Actualiza usuario con password ya hasheado (opcional)
+     * CAMBIO: Ahora acepta TODOS los roles
+     */
     public function updateUserHashed(
         int $id,
         string $name,
@@ -140,15 +146,18 @@ class UsuarioRepository implements UserRepositoryInterface
     ): bool {
         $email = strtolower(trim($email));
         $name  = trim($name);
-        $role  = in_array($role, ['admin','facturador', 'bodeguero', 'liquidador', 'vendedor_sistema'], true) ? $role : 'user';
+
+        // ✅ CAMBIO AQUÍ: Validación con UserRole::exists() + fallback seguro
+        $role = UserRole::exists($role) ? $role : UserRole::USER;  // ← LÍNEA CAMBIADA
 
         try {
             if ($password_hash === null) {
+                // Sin cambio de contraseña
                 $sql = 'UPDATE users
-                       SET name = :name,
-                           email = :email,
-                           role  = :role
-                     WHERE id = :id';
+                    SET name = :name,
+                        email = :email,
+                        role  = :role
+                    WHERE id = :id';
                 $params = [
                     'name'  => $name,
                     'email' => $email,
@@ -156,12 +165,13 @@ class UsuarioRepository implements UserRepositoryInterface
                     'id'    => $id,
                 ];
             } else {
+                // Con cambio de contraseña
                 $sql = 'UPDATE users
-                       SET name = :name,
-                           email = :email,
-                           password_hash = :password_hash,
-                           role  = :role
-                     WHERE id = :id';
+                    SET name = :name,
+                        email = :email,
+                        password_hash = :password_hash,
+                        role  = :role
+                    WHERE id = :id';
                 $params = [
                     'name'          => $name,
                     'email'         => $email,
@@ -172,10 +182,8 @@ class UsuarioRepository implements UserRepositoryInterface
             }
 
             $stmt = $this->pdo->prepare($sql);
-            $ok   = $stmt->execute($params);
+            return $stmt->execute($params);
 
-            // rowCount puede ser 0 si no cambió nada; lo tomamos como éxito
-            return $ok;
         } catch (PDOException $e) {
             LogManager::logError('Error actualizando user (hashed): ' . $e->getMessage());
             return false;
@@ -184,30 +192,30 @@ class UsuarioRepository implements UserRepositoryInterface
 
 
 
-
+    /**
+     * Wrapper legacy: recibe password en texto plano
+     * CAMBIO: Ahora acepta TODOS los roles
+     */
     public function createUser(
         string $name,
         string $email,
         string $password_plain,
         string $role = 'user'
     ): ?int {
-        // Wrapper de compatibilidad: recibe PASSWORD EN CLARO y delega al método Hashed
         $cleanEmail = trim(strtolower($email));
         $cleanName  = trim($name);
         $plain      = (string) $password_plain;
 
-        // Validaciones mínimas aquí (el Service ya valida también)
+        // ✅ CAMBIO AQUÍ: Usar UserRole::exists()
         if (!filter_var($cleanEmail, FILTER_VALIDATE_EMAIL) ||
             mb_strlen($plain) < 6 ||
-            !in_array($role, ['user','admin'], true)
-        ) {
+            !UserRole::exists($role)) {  // ← LÍNEA CAMBIADA
             LogManager::logError('Registro falló: Validación input inválida (repo wrapper).');
             return null;
         }
 
-        // Hash aquí SOLO en el wrapper (el método Hashed no hachea)
+        // Hash y delegar
         $password_hash = password_hash($plain, PASSWORD_DEFAULT);
-
         return $this->createUserHashed($cleanEmail, $cleanName, $password_hash, $role);
     }
 
@@ -215,6 +223,10 @@ class UsuarioRepository implements UserRepositoryInterface
      * Inserta un usuario recibiendo YA el password_hash (no hash aquí).
      * Ideal para uso desde UserService.
      */
+/**
+* Crea usuario con password ya hasheado
+* CAMBIO: Ahora acepta TODOS los roles
+*/
     public function createUserHashed(
         string $email,
         string $name,
@@ -225,20 +237,23 @@ class UsuarioRepository implements UserRepositoryInterface
         $cleanName  = trim($name);
         $hash       = trim($password_hash);
 
+        // ✅ CAMBIO AQUÍ: Usar UserRole::exists() en vez de array hardcodeado
         if (!filter_var($cleanEmail, FILTER_VALIDATE_EMAIL) ||
             $hash === '' ||
-            !in_array($role, ['facturador', 'bodeguero', 'liquidador', 'vendedor_sistema'], true)
-        ) {
-            LogManager::logError('Registro falló: Datos inválidos en createUserHashed.');
+            !UserRole::exists($role)) {  // ← LÍNEA CAMBIADA
+            LogManager::logError('Datos inválidos en createUserHashed', [
+                'email' => $cleanEmail,
+                'role' => $role
+            ]);
             return null;
         }
 
         try {
-            // OJO: confía en índice único de BD + captura de excepción en Service
             $stmt = $this->pdo->prepare(
                 'INSERT INTO users (email, name, password_hash, role, created_at)
              VALUES (:email, :name, :password_hash, :role, NOW())'
             );
+
             $stmt->execute([
                 'email'         => $cleanEmail,
                 'name'          => $cleanName,
@@ -247,9 +262,10 @@ class UsuarioRepository implements UserRepositoryInterface
             ]);
 
             return (int) $this->pdo->lastInsertId();
+
         } catch (PDOException $e) {
             LogManager::logError('Error al crear usuario (Hashed): ' . $e->getMessage());
-            return null; // Si prefieres: throw; y que lo maneje el Service
+            return null;
         }
     }
 

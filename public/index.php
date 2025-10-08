@@ -1,5 +1,14 @@
 <?php
+
+
 declare(strict_types=1);
+
+// Mostrar todos los errores (desarrollo)
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+
+// ... resto de tu código
 use Enoc\Login\Core\Router;
 use Dotenv\Dotenv;
 use Enoc\Login\Core\LogManager;
@@ -42,7 +51,7 @@ if ($appDebug) {
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
 } else {
-    error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
     ini_set('display_errors', '0');
 }
 

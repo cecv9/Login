@@ -77,15 +77,35 @@ if (is_file($navbar)) {
     </form>
 </div>
 
-<!-- ← NUEVO: JS simple para match passwords (opcional, UX) -->
+<!-- JS para validación + prevención doble submit -->
 <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function(e) {
+        // Validación de contraseñas
         const pass = document.getElementById('password').value;
         const confirm = document.getElementById('confirm_password').value;
         if (pass && pass !== confirm) {
             alert('Contraseñas no coinciden');
             e.preventDefault();
+            return;
         }
+
+        // Prevenir doble submit
+        if (submitBtn.disabled) {
+            e.preventDefault();
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Actualizando...';
+
+        // Re-habilitar después de 3 segundos por si hay error
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Actualizar Usuario';
+        }, 3000);
     });
 </script>
 </body>

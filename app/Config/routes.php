@@ -21,8 +21,8 @@ return [
         '/login'    => 'AuthController@processLogin',
         '/logout'   => 'AuthController@logout',
         '/register' => 'AuthController@processRegister',
-        '/admin/users' => 'AdminController@store',
-        '/admin/users/update' => 'AdminController@update',
-        '/admin/users/delete' => 'AdminController@destroy',
+        '/admin/users' => 'AdminController@store',          // POST /admin/users (crear)
+        '/admin/users/update' => 'AdminController@update',  // POST /admin/users/update (actualizar)
+        '/admin/users/delete' => 'AdminController@destroy', // POST /admin/users/delete (eliminar)
     ],
 ];

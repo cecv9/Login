@@ -14,6 +14,7 @@
         <p>Usuario: <?= htmlspecialchars($userName ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
         <?php if (!empty($userEmail)): ?>
             <p>Email: <?= htmlspecialchars($userEmail, ENT_QUOTES, 'UTF-8'); ?></p>
+        <p>Rol:<?=htmlspecialchars($userRole,ENT_QUOTES, 'UTF-8');?></p>
 
         <?php endif; ?>
         <form action="/logout" method="POST">

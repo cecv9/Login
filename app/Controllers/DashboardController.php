@@ -18,6 +18,7 @@ class DashboardController extends BaseController
             'title' => 'Dashboard',
             'userName' => $userName,
             'userEmail' => $userEmail,
+            'userRole' => $_SESSION['user_role'] ?? 'user',
             'csrfToken' => $csrfToken,
         ]);
     }

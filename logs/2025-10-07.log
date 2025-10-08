@@ -228,3 +228,30 @@
 [2025-10-07 04:37:41] [INFO] Aplicación iniciada []
 [2025-10-07 04:37:45] [INFO] Aplicación iniciada []
 [2025-10-07 04:37:45] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:07] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:08] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:21] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:21] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:22] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:24] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:40] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:40] [INFO] Intentando crear usuario {"target_email":"loco@gmail.com","target_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:40+00:00"}
+[2025-10-07 04:44:40] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":44,"target_email":"loco@gmail.com","target_name":"loco","target_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:40+00:00"}
+[2025-10-07 04:44:40] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:42] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:45] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:45] [INFO] Intentando actualizar usuario {"target_user_id":44,"target_email":"loco@gmail.com","has_password_change":false,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:45+00:00"}
+[2025-10-07 04:44:45] [INFO] ✅ Usuario actualizado {"action":"USER_UPDATED","target_user_id":44,"target_email":"loco@gmail.com","target_name":"locoxd","target_role":"bodeguero","password_changed":false,"old_email":"loco@gmail.com","old_name":"loco","old_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:45+00:00"}
+[2025-10-07 04:44:45] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:46] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:50] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:50] [INFO] Intentando actualizar usuario {"target_user_id":44,"target_email":"locoo@gmail.com","has_password_change":false,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:50+00:00"}
+[2025-10-07 04:44:50] [INFO] ✅ Usuario actualizado {"action":"USER_UPDATED","target_user_id":44,"target_email":"locoo@gmail.com","target_name":"locoxd","target_role":"bodeguero","password_changed":false,"old_email":"loco@gmail.com","old_name":"locoxd","old_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:50+00:00"}
+[2025-10-07 04:44:50] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:55] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:56] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:56] [INFO] Intentando eliminar usuario {"target_user_id":44,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:56+00:00"}
+[2025-10-07 04:44:56] [WARNING] ⚠️ Usuario eliminado (soft delete) {"action":"USER_DELETED","target_user_id":44,"target_email":"locoo@gmail.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-07T04:44:56+00:00"}
+[2025-10-07 04:44:56] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:59] [INFO] Aplicación iniciada []
+[2025-10-07 04:44:59] [INFO] Aplicación iniciada []
