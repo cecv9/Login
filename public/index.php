@@ -3,10 +3,9 @@
 
 declare(strict_types=1);
 
-// Mostrar todos los errores (desarrollo)
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
+// Initial error configuration (will be refined after loading .env)
+ini_set('log_errors', '1');
+ini_set('error_log', dirname(__DIR__) . '/logs/php-errors.log');
 
 // ... resto de tu código
 use Enoc\Login\Core\Router;
@@ -37,22 +36,20 @@ LogManager::logInfo('Aplicación iniciada');
  *****************************************************************/
 $appDebug = filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-/* Si estamos en producción (no CLI) y alguien deja APP_DEBUG=true → cortar */
-if ($appDebug && php_sapi_name() !== 'cli') {
-    http_response_code(500);
-    header('Content-Type: text/plain');
-    echo "Internal Server Error\n";
-    LogManager::logError('APP_DEBUG=true en producción. Apágalo.');
-    exit;
-}
-
-/* Configuración de errores (solo si llegamos aquí) */
+/* Configuración de errores basada en modo debug */
 if ($appDebug) {
+    // Development mode: Show all errors
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    LogManager::logInfo('Application running in DEBUG mode');
 } else {
-    error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+    // Production mode: Hide errors from users, log internally
+    error_reporting(E_ALL);
     ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    // Ensure errors are logged
+    ini_set('log_errors', '1');
 }
 
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'UTC');
@@ -112,6 +109,39 @@ try {
         ? 'DB connection error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8')
         : 'Internal server error';
     exit;
+}
+
+/**
+ * Set security headers for all responses
+ * Protects against common web vulnerabilities (OWASP recommendations)
+ */
+function setSecurityHeaders(): void {
+    if (php_sapi_name() === 'cli') {
+        return; // Skip in CLI mode
+    }
+
+    // Prevent clickjacking
+    header('X-Frame-Options: DENY');
+    
+    // Prevent MIME type sniffing
+    header('X-Content-Type-Options: nosniff');
+    
+    // Control referrer information
+    header('Referrer-Policy: no-referrer');
+    
+    // Content Security Policy - restrictive but allows inline styles for compatibility
+    header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none';");
+    
+    // Enable XSS protection (legacy, but doesn't hurt)
+    header('X-XSS-Protection: 1; mode=block');
+    
+    // HSTS - Force HTTPS for 1 year (only send over HTTPS)
+    if (isHttps()) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+    
+    // Permissions Policy - disable unnecessary features
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
 }
 
 /**
@@ -213,8 +243,12 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 /**
- * 6) (Temporal) Mini-despacho hasta tener Router real
- *    Aquí solo confirmamos que el bootstrap funcionó.
+ * 6) Apply security headers to all responses
+ */
+setSecurityHeaders();
+
+/**
+ * 7) Router dispatch and request handling
  */
 try {
     $router = new Router($connection);
@@ -222,7 +256,7 @@ try {
     // Cargar rutas desde configuración
     $router->loadRoutes(__DIR__ . '/../app/Config/routes.php');
 
-    // ✅ Nuevo estilo
+    // Middleware configuration
     $router->middleware('GET',  '/dashboard',            ['auth']);
     $router->middleware('GET',  '/admin/users',          ['auth', 'role:admin']);
     $router->middleware('POST', '/admin/users',          ['auth', 'role:admin']);
@@ -241,33 +275,32 @@ try {
 
     echo $router->dispatch($requestUri, $requestMethod);
 
-}  catch (\Throwable $e) {
+} catch (\Throwable $e) {
+    // Set error response code
     http_response_code(500);
     header('Content-Type: text/html; charset=utf-8');
-    header('X-Frame-Options: DENY');
-    header('X-Content-Type-Options: nosniff');
-    header('Referrer-Policy: no-referrer');
 
-    // Log interno
+    // Log error internally (always log, regardless of debug mode)
     LogManager::logError('Unhandled exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
 
+    // Display appropriate error message based on environment
     if ($appDebug && php_sapi_name() !== 'cli') {
-        echo '<h1>Error 500</h1>';
-        echo '<p>' . htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>';
-        echo '<pre>' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
+        // Development mode: Show detailed error information
+        echo '<h1>Error 500 - Internal Server Error</h1>';
+        echo '<p><strong>Message:</strong> ' . htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>';
+        echo '<p><strong>File:</strong> ' . htmlspecialchars($e->getFile(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . ':' . $e->getLine() . '</p>';
+        echo '<pre><strong>Stack Trace:</strong>' . "\n" . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
     } else {
-        echo 'Lo sentimos, algo salió mal. Inténtalo más tarde.';
+        // Production mode: Generic error message (no sensitive information)
+        echo '<!DOCTYPE html>';
+        echo '<html lang="es">';
+        echo '<head><meta charset="UTF-8"><title>Error del Servidor</title></head>';
+        echo '<body>';
+        echo '<h1>Lo sentimos, algo salió mal.</h1>';
+        echo '<p>Estamos trabajando para solucionar el problema. Por favor, intenta de nuevo más tarde.</p>';
+        echo '</body>';
+        echo '</html>';
     }
 
-    /*********************************************************
-     * HEADERS DE SEGURIDAD (TODAS las respuestas)
-     *********************************************************/
-    if (php_sapi_name() !== 'cli') {
-        header('X-Frame-Options: DENY');
-        header('X-Content-Type-Options: nosniff');
-        header('Referrer-Policy: no-referrer');
-        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none';");
-    }
     exit;
-
 }
