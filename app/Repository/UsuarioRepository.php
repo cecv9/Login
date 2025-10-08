@@ -517,4 +517,150 @@ class UsuarioRepository implements UserRepositoryInterface
         return $this->softDeleteUser($id);
     }
 
+    /**
+     * Rate Limiting Methods
+     * Track failed login/register attempts to prevent brute force attacks
+     */
+
+    /**
+     * Record a failed login or register attempt
+     * @param string $identifier Email or IP address
+     * @param string $attemptType 'login' or 'register'
+     * @param string $ipAddress IP address of the requester
+     * @return bool Success
+     */
+    public function recordFailedAttempt(string $identifier, string $attemptType, string $ipAddress): bool
+    {
+        try {
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+            
+            $stmt = $this->pdo->prepare(
+                'INSERT INTO login_attempts (identifier, attempt_type, ip_address, user_agent, attempted_at)
+                 VALUES (:identifier, :attempt_type, :ip_address, :user_agent, NOW())'
+            );
+            
+            return $stmt->execute([
+                'identifier' => strtolower(trim($identifier)),
+                'attempt_type' => $attemptType,
+                'ip_address' => $ipAddress,
+                'user_agent' => $userAgent
+            ]);
+        } catch (PDOException $e) {
+            LogManager::logError('Error recording failed attempt: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if an identifier is rate limited
+     * @param string $identifier Email or IP address
+     * @param string $attemptType 'login' or 'register'
+     * @param int $maxAttempts Maximum attempts allowed
+     * @param int $windowMinutes Time window in minutes
+     * @return bool True if rate limited (blocked)
+     */
+    public function isRateLimited(string $identifier, string $attemptType, int $maxAttempts = 5, int $windowMinutes = 15): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'SELECT COUNT(*) FROM login_attempts
+                 WHERE identifier = :identifier
+                   AND attempt_type = :attempt_type
+                   AND attempted_at > DATE_SUB(NOW(), INTERVAL :window_minutes MINUTE)'
+            );
+            
+            $stmt->execute([
+                'identifier' => strtolower(trim($identifier)),
+                'attempt_type' => $attemptType,
+                'window_minutes' => $windowMinutes
+            ]);
+            
+            $count = (int)$stmt->fetchColumn();
+            return $count >= $maxAttempts;
+        } catch (PDOException $e) {
+            LogManager::logError('Error checking rate limit: ' . $e->getMessage());
+            // Fail open: don't block legitimate users if DB fails
+            return false;
+        }
+    }
+
+    /**
+     * Get remaining attempts before rate limit
+     * @param string $identifier Email or IP address
+     * @param string $attemptType 'login' or 'register'
+     * @param int $maxAttempts Maximum attempts allowed
+     * @param int $windowMinutes Time window in minutes
+     * @return int Remaining attempts
+     */
+    public function getRemainingAttempts(string $identifier, string $attemptType, int $maxAttempts = 5, int $windowMinutes = 15): int
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'SELECT COUNT(*) FROM login_attempts
+                 WHERE identifier = :identifier
+                   AND attempt_type = :attempt_type
+                   AND attempted_at > DATE_SUB(NOW(), INTERVAL :window_minutes MINUTE)'
+            );
+            
+            $stmt->execute([
+                'identifier' => strtolower(trim($identifier)),
+                'attempt_type' => $attemptType,
+                'window_minutes' => $windowMinutes
+            ]);
+            
+            $count = (int)$stmt->fetchColumn();
+            return max(0, $maxAttempts - $count);
+        } catch (PDOException $e) {
+            LogManager::logError('Error getting remaining attempts: ' . $e->getMessage());
+            return $maxAttempts; // Fail open
+        }
+    }
+
+    /**
+     * Clear failed attempts for an identifier (e.g., after successful login)
+     * @param string $identifier Email or IP address
+     * @param string $attemptType 'login' or 'register'
+     * @return bool Success
+     */
+    public function clearFailedAttempts(string $identifier, string $attemptType): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'DELETE FROM login_attempts
+                 WHERE identifier = :identifier
+                   AND attempt_type = :attempt_type'
+            );
+            
+            return $stmt->execute([
+                'identifier' => strtolower(trim($identifier)),
+                'attempt_type' => $attemptType
+            ]);
+        } catch (PDOException $e) {
+            LogManager::logError('Error clearing failed attempts: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Cleanup old login attempts (older than specified hours)
+     * Should be called periodically (e.g., via cron)
+     * @param int $olderThanHours Delete attempts older than this many hours
+     * @return int Number of deleted records
+     */
+    public function cleanupOldAttempts(int $olderThanHours = 24): int
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'DELETE FROM login_attempts
+                 WHERE attempted_at < DATE_SUB(NOW(), INTERVAL :hours HOUR)'
+            );
+            
+            $stmt->execute(['hours' => $olderThanHours]);
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            LogManager::logError('Error cleaning up old attempts: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
 }

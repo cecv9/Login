@@ -22,6 +22,37 @@ class AuthController extends BaseController{
 
     }
 
+    /**
+     * Get client IP address considering proxies
+     * @return string IP address
+     */
+    private function getClientIp(): string
+    {
+        // Check for proxy headers (in order of trust)
+        $ipHeaders = [
+            'HTTP_CF_CONNECTING_IP',    // Cloudflare
+            'HTTP_X_FORWARDED_FOR',     // Standard proxy header
+            'HTTP_X_REAL_IP',           // Nginx proxy
+            'REMOTE_ADDR'               // Direct connection
+        ];
+
+        foreach ($ipHeaders as $header) {
+            if (!empty($_SERVER[$header])) {
+                $ip = $_SERVER[$header];
+                // Handle comma-separated list (X-Forwarded-For can have multiple IPs)
+                if (str_contains($ip, ',')) {
+                    $ip = trim(explode(',', $ip)[0]);
+                }
+                // Validate IP
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        }
+
+        return '0.0.0.0'; // Fallback
+    }
+
 
     /**
      * Mostrar formulario de login
@@ -53,68 +84,53 @@ class AuthController extends BaseController{
         $email = $this->getPost('email');
         $email=trim(strtolower($email));
         $password = $this->getPost('password');
-        $password = trim($password);  // ← FIX: Elimina espacios leading/trailing
+        $password = trim($password);
 
         // Validaciones básicas
         if (empty($email) || empty($password)) {
             $_SESSION['error'] = 'Email y contraseña son requeridos';
-            return $this->redirect('/login'); //http://localhost/login
+            return $this->redirect('/login');
         }
 
-        // Aquí validarías contra la base de datos
-         // Por ahora, usuario de prueba
-       //if ($email === 'admin@test.com' && $password === '123456') {
-        //session_regenerate_id(true); //xd
-          //$_SESSION['user_id'] = 1;
-           //$_SESSION['user_email'] = $email;
-            //$_SESSION['user_name'] = 'Administrador';
+        // Rate limiting: Check both email and IP
+        $clientIp = $this->getClientIp();
+        $isEmailLimited = $this->repository->isRateLimited($email, 'login', 5, 15);
+        $isIpLimited = $this->repository->isRateLimited($clientIp, 'login', 10, 15);
 
-             //return $this->redirect('/dashboard');
-       //}
+        if ($isEmailLimited || $isIpLimited) {
+            $_SESSION['error'] = 'Demasiados intentos fallidos. Por favor, intenta de nuevo en 15 minutos.';
+            LogManager::logWarning("Rate limit exceeded for login", [
+                'email' => $email,
+                'ip' => $clientIp
+            ]);
+            return $this->redirect('/login');
+        }
 
-        // Lógica real: Buscar usuario en BD
-
-
+        // Buscar usuario en BD
         $user = $this->repository->findByEmail($email);
 
-// DEBUG TEMPORAL - QUITAR EN PROD
-        // DEBUG TEMPORAL - QUITAR EN PROD
-        //if ($user) {
-            //$fetchedHash = $user->getPassword();
-            //$verifyResult = password_verify($password, $fetchedHash);
-            //echo "<pre style='background: #f0f0f0; padding: 10px; border:1px solid #ccc;'>";
-            //echo "DEBUG LOGIN:\n";
-            //echo "- Email buscado: $email\n";
-            //echo "- ID: " . $user->getId() . "\n";
-            //echo "- Email fetched: " . $user->getEmail() . "\n";
-            //echo "- Hash fetched (length): " . strlen($fetchedHash) . " chars\n";
-            //echo "- Hash preview: " . substr($fetchedHash, 0, 20) . "...\n";
-            //echo "- Password input EXACT (length): '" . addslashes($password) . "' (" . strlen($password) . " chars)\n";  // ← NUEVO: Muestra full con escapes
-            //echo "- Verify result: " . ($verifyResult ? 'TRUE ✅' : 'FALSE ❌') . "\n";
-           // echo "</pre>";
-           // exit;
-      //  } else {
-         //   echo "<pre>DEBUG: User null</pre>";
-           // exit;
-       // }
-
-
-
-
-        // var_dump($email, $user ? $user->getPassword() : 'User null'); // Debug
-
         if (!$user || !password_verify($password, $user->getPassword())) {
-            $_SESSION['error'] = 'Credenciales incorrectas xd';
+            // Record failed attempt for both email and IP
+            $this->repository->recordFailedAttempt($email, 'login', $clientIp);
+            $this->repository->recordFailedAttempt($clientIp, 'login', $clientIp);
+            
+            $_SESSION['error'] = 'Credenciales incorrectas';
+            LogManager::logWarning("Failed login attempt", ['email' => $email, 'ip' => $clientIp]);
             return $this->redirect('/login');
-        }else{
-            // Login exitoso: Regenerar sesión y guardar datos
+        } else {
+            // Login exitoso: Clear failed attempts and regenerate session
+            $this->repository->clearFailedAttempts($email, 'login');
+            $this->repository->clearFailedAttempts($clientIp, 'login');
+            
             session_regenerate_id(true);
             $this->rotateCsrf();
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             $_SESSION['user_id'] = $user->getId();
             $_SESSION['user_email'] = $user->getEmail();
-            $_SESSION['user_name'] = $user->getName();  // Usa getName() si el modelo lo tiene
-            $_SESSION['user_role'] = $user->getRole();  // ← NUEVO: Guarda rol en sesión
+            $_SESSION['user_name'] = $user->getName();
+            $_SESSION['user_role'] = $user->getRole();
+            
+            LogManager::logInfo("Successful login", ['email' => $email]);
             return $this->redirect('/dashboard');
         }
     }
@@ -124,7 +140,6 @@ class AuthController extends BaseController{
      */
     public function logout(): void
     {
-
         $requestMethod = $_SERVER['REQUEST_METHOD'] ?? '';
 
         if ($requestMethod !== 'POST') {
@@ -133,22 +148,15 @@ class AuthController extends BaseController{
             exit('Method Not Allowed');
         }
 
-       // $submittedToken = $_POST['csrf_token'] ?? '';
-       // $sessionToken = $_SESSION['csrf_token'] ?? null;
+        // Validate CSRF token using hash_equals for timing-safe comparison
         $submittedToken = $_POST['csrf_token'] ?? null;
-
-       // if (!is_string($sessionToken) || $sessionToken === '' ||
-         //   !is_string($submittedToken) || !hash_equals($sessionToken, $submittedToken)) {
-           // http_response_code(400);
-            //exit('Invalid CSRF token');
-        //}
+        
         if (!$this->validateCsrf(is_string($submittedToken) ? $submittedToken : null)) {
-            $_SESSION['error'] = 'Token de seguridad inválido. Por favor intente de nuevo.';
-            $this->redirect('/login');
-            return; // Nunca se ejecuta por el redirect, pero es buena práctica
-
+            http_response_code(400);
+            exit('Invalid CSRF token');
         }
 
+        // Destroy session securely
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
             session_unset();
@@ -206,6 +214,20 @@ class AuthController extends BaseController{
         $password = $this->getPost('password', '');
         $confirmPassword = $this->getPost('confirm_password', '');
 
+        // Rate limiting: Check both email and IP
+        $clientIp = $this->getClientIp();
+        $isEmailLimited = $this->repository->isRateLimited($email, 'register', 5, 15);
+        $isIpLimited = $this->repository->isRateLimited($clientIp, 'register', 10, 15);
+
+        if ($isEmailLimited || $isIpLimited) {
+            $_SESSION['register_error'] = 'Demasiados intentos de registro. Por favor, intenta de nuevo en 15 minutos.';
+            LogManager::logWarning("Rate limit exceeded for registration", [
+                'email' => $email,
+                'ip' => $clientIp
+            ]);
+            return $this->redirect('/register');
+        }
+
         // ← TRAIT: Reglas sin role
         $rules = [
             'name' => ['required', 'min:2'],
@@ -218,20 +240,33 @@ class AuthController extends BaseController{
         $errors = $this->validateUserData($data, $rules);  // ← LLAMA TRAIT
 
         if (!empty($errors)) {
-            $_SESSION['register_errors'] = $errors;  // Por campo
-            $_SESSION['input_name'] = $name;  // Prefill
+            // Record failed registration attempt
+            $this->repository->recordFailedAttempt($email, 'register', $clientIp);
+            $this->repository->recordFailedAttempt($clientIp, 'register', $clientIp);
+            
+            $_SESSION['register_errors'] = $errors;
+            $_SESSION['input_name'] = $name;
             $_SESSION['input_email'] = $email;
             return $this->redirect('/register');
         }
 
         // Repo (default role 'user')
-        $userId = $this->repository->createUser($name, $email,$password , 'user');  // ← Orden: email, pass, name, role (ajusta si signature diferente)
+        $userId = $this->repository->createUser($name, $email, $password, 'user');
 
         if ($userId) {
+            // Clear failed attempts on successful registration
+            $this->repository->clearFailedAttempts($email, 'register');
+            $this->repository->clearFailedAttempts($clientIp, 'register');
+            
             $_SESSION['register_success'] = 'Usuario creado exitosamente. <a href="/login">Inicia sesión</a>';
             $this->rotateCsrf();
+            LogManager::logInfo("Successful registration", ['email' => $email]);
             return $this->redirect('/register');
         } else {
+            // Record failed attempt
+            $this->repository->recordFailedAttempt($email, 'register', $clientIp);
+            $this->repository->recordFailedAttempt($clientIp, 'register', $clientIp);
+            
             $_SESSION['register_error'] = 'Error al crear usuario (inténtalo de nuevo).';
             $_SESSION['input_name'] = $name;
             $_SESSION['input_email'] = $email;
