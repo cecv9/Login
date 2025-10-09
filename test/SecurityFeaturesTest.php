@@ -48,27 +48,26 @@ try {
     exit(1);
 }
 
-// Test 2: AuthController has getClientIp method
-echo "Test 2: AuthController Helper Methods\n";
+// Test 2: RequestSecurity helper exposes hardened methods
+echo "Test 2: RequestSecurity Helper\n";
 try {
-    $reflection = new ReflectionClass('Enoc\Login\Controllers\AuthController');
-    
-    // Check private methods using reflection
-    $methods = $reflection->getMethods(ReflectionMethod::IS_PRIVATE);
-    $hasGetClientIp = false;
-    
-    foreach ($methods as $method) {
-        if ($method->getName() === 'getClientIp') {
-            $hasGetClientIp = true;
-            break;
+    $reflection = new ReflectionClass('Enoc\Login\Core\RequestSecurity');
+
+    $requiredMethods = ['getClientIp', 'isHttps'];
+    $allPresent = true;
+
+    foreach ($requiredMethods as $methodName) {
+        if ($reflection->hasMethod($methodName) && $reflection->getMethod($methodName)->isStatic()) {
+            echo "  ✓ Static method '$methodName' exists\n";
+        } else {
+            echo "  ✗ Static method '$methodName' missing\n";
+            $allPresent = false;
         }
     }
-    
-    if ($hasGetClientIp) {
-        echo "  ✓ Method 'getClientIp' exists\n";
-        echo "  Result: PASS - Helper method exists\n\n";
+
+    if ($allPresent) {
+        echo "  Result: PASS - RequestSecurity helper available\n\n";
     } else {
-        echo "  ✗ Method 'getClientIp' NOT FOUND\n";
         echo "  Result: FAIL\n\n";
         exit(1);
     }

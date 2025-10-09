@@ -16,6 +16,16 @@ class AuditDashboardController extends BaseController
         $logPath = $_ENV['LOG_PATH'] ?? dirname(__DIR__, 2) . '/logs';
         $this->analyzer = new LogAnalyzer($logPath);
     }
+    private function assertAdminAccess(): void
+    {
+        if (($_SESSION['user_role'] ?? null) === 'admin') {
+            return;
+        }
+
+        $_SESSION['error'] = 'Acceso denegado';
+        $target = empty($_SESSION['user_id']) ? '/login' : '/dashboard';
+        $this->redirect($target);
+    }
 
     /**
      * Vista principal del dashboard
@@ -23,11 +33,7 @@ class AuditDashboardController extends BaseController
      */
     public function index(): string
     {
-        // Solo administradores
-        if (($_SESSION['user_role'] ?? 'user') !== 'admin') {
-            $_SESSION['error'] = 'Acceso denegado';
-            $this->redirect('/admin');
-        }
+        $this->assertAdminAccess();
 
         $startDate = $_GET['start'] ?? date('Y-m-d', strtotime('-7 days'));
         $endDate = $_GET['end'] ?? date('Y-m-d');
@@ -50,10 +56,7 @@ class AuditDashboardController extends BaseController
      */
     public function userActions(): string
     {
-        if (($_SESSION['user_role'] ?? 'user') !== 'admin') {
-            $_SESSION['error'] = 'Acceso denegado';
-            $this->redirect('/admin');
-        }
+        $this->assertAdminAccess();
 
         $userId = (int)($_GET['id'] ?? 0);
         if ($userId <= 0) {
@@ -77,10 +80,7 @@ class AuditDashboardController extends BaseController
      */
     public function userHistory(): string
     {
-        if (($_SESSION['user_role'] ?? 'user') !== 'admin') {
-            $_SESSION['error'] = 'Acceso denegado';
-            $this->redirect('/admin');
-        }
+        $this->assertAdminAccess();
 
         $targetId = (int)($_GET['id'] ?? 0);
         if ($targetId <= 0) {
@@ -107,7 +107,7 @@ class AuditDashboardController extends BaseController
      */
     public function export(): void
     {
-        if (($_SESSION['user_role'] ?? 'user') !== 'admin') {
+        if (($_SESSION['user_role'] ?? null) !== 'admin') {
             http_response_code(403);
             echo json_encode(['error' => 'Acceso denegado']);
             exit;

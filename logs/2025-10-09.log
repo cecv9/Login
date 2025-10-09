@@ -1,0 +1,22 @@
+[2025-10-09 00:14:41] [INFO] Aplicación iniciada []
+[2025-10-09 00:14:42] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:08] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:08] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-09 00:15:08] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:10] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:14] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:17] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:17] [INFO] Intentando actualizar usuario {"target_user_id":22,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-09T00:15:17+00:00"}
+[2025-10-09 00:15:17] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":22,"new_email":"usu1@gmail.com","new_name":"usuario1","new_role":"facturador","password_changed":false,"old_email":"usu1@gmail.com","old_name":"usuario1","old_role":"user","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-09T00:15:17+00:00"}
+[2025-10-09 00:15:17] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:20] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:30] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:33] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:43] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:56] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:57] [INFO] Aplicación iniciada []
+[2025-10-09 00:15:59] [INFO] Aplicación iniciada []
+[2025-10-09 00:16:03] [INFO] Aplicación iniciada []
+[2025-10-09 00:41:19] [INFO] Aplicación iniciada []
+[2025-10-09 00:41:35] [INFO] Aplicación iniciada []
+[2025-10-09 00:41:35] [INFO] Aplicación iniciada []

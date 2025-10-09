@@ -7,6 +7,7 @@ namespace Enoc\Login\Controllers;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Repository\UsuarioRepository;
 use Enoc\Login\models\Users;
+use Enoc\Login\Core\RequestSecurity;
 use Enoc\Login\Traits\ValidatorTrait;
 use Enoc\Login\Core\LogManager;
 
@@ -22,36 +23,7 @@ class AuthController extends BaseController{
 
     }
 
-    /**
-     * Get client IP address considering proxies
-     * @return string IP address
-     */
-    private function getClientIp(): string
-    {
-        // Check for proxy headers (in order of trust)
-        $ipHeaders = [
-            'HTTP_CF_CONNECTING_IP',    // Cloudflare
-            'HTTP_X_FORWARDED_FOR',     // Standard proxy header
-            'HTTP_X_REAL_IP',           // Nginx proxy
-            'REMOTE_ADDR'               // Direct connection
-        ];
 
-        foreach ($ipHeaders as $header) {
-            if (!empty($_SERVER[$header])) {
-                $ip = $_SERVER[$header];
-                // Handle comma-separated list (X-Forwarded-For can have multiple IPs)
-                if (str_contains($ip, ',')) {
-                    $ip = trim(explode(',', $ip)[0]);
-                }
-                // Validate IP
-                if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                    return $ip;
-                }
-            }
-        }
-
-        return '0.0.0.0'; // Fallback
-    }
 
 
     /**
@@ -93,7 +65,7 @@ class AuthController extends BaseController{
         }
 
         // Rate limiting: Check both email and IP
-        $clientIp = $this->getClientIp();
+        $clientIp = RequestSecurity::getClientIp($_SERVER);
         $isEmailLimited = $this->repository->isRateLimited($email, 'login', 5, 15);
         $isIpLimited = $this->repository->isRateLimited($clientIp, 'login', 10, 15);
 
@@ -215,8 +187,8 @@ class AuthController extends BaseController{
         $confirmPassword = $this->getPost('confirm_password', '');
 
         // Rate limiting: Check both email and IP
-        $clientIp = $this->getClientIp();
-        $isEmailLimited = $this->repository->isRateLimited($email, 'register', 5, 15);
+        $clientIp = RequestSecurity::getClientIp($_SERVER);
+        $isEmailLimited = $this->repository->isRateLimited($email, 'register', 2, 10);
         $isIpLimited = $this->repository->isRateLimited($clientIp, 'register', 10, 15);
 
         if ($isEmailLimited || $isIpLimited) {
@@ -232,11 +204,15 @@ class AuthController extends BaseController{
         $rules = [
             'name' => ['required', 'min:2'],
             'email' => ['required', 'email', 'unique'],  // Duplicado pre-repo
-            'password' => ['required', 'min:6'],
-            'confirmPassword' => ['required', 'min:6', 'match:password']
+            'confirm_password' => ['required', 'min:6', 'match:password']
         ];
 
-        $data = compact('name', 'email', 'password', 'confirmPassword');
+        $data = [
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'confirm_password' => $confirmPassword,
+        ];
         $errors = $this->validateUserData($data, $rules);  // ← LLAMA TRAIT
 
         if (!empty($errors)) {

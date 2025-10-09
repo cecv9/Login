@@ -24,7 +24,7 @@
         <button type="submit" class="btn-logout">Cerrar sesión</button>
     </form>
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="success"><?= $_SESSION['success'] ?></div>
+        <div class="success"><?= htmlspecialchars($_SESSION['success']) ?></div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['error'])): ?>

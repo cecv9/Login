@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Enoc\Login\Controllers;
 
+
+use Enoc\Login\Core\RequestSecurity;
+
 /**
  * Contexto de auditoría para rastrear operaciones
  * Contiene información sobre QUIÉN hace QUÉ y DESDE DÓNDE
@@ -27,7 +30,7 @@ final class AuditContext
             userId: $_SESSION['user_id'] ?? null,
             username: $_SESSION['user_name'] ?? null,
             userEmail: $_SESSION['user_email'] ?? null,
-            ipAddress: self::getClientIp(),
+            ipAddress: self::resolveClientIp(),
             userAgent: $_SERVER['HTTP_USER_AGENT'] ?? null
         );
     }
@@ -66,26 +69,9 @@ final class AuditContext
     /**
      * Obtiene la IP real del cliente (considera proxies)
      */
-    private static function getClientIp(): ?string
+    private static function resolveClientIp(): ?string
     {
-        $keys = [
-            'HTTP_CF_CONNECTING_IP', // Cloudflare
-            'HTTP_X_FORWARDED_FOR',  // Proxies
-            'HTTP_X_REAL_IP',
-            'REMOTE_ADDR'
-        ];
-
-        foreach ($keys as $key) {
-            if (!empty($_SERVER[$key])) {
-                $ip = $_SERVER[$key];
-                // Si hay múltiples IPs (proxy chain), tomar la primera
-                if (str_contains($ip, ',')) {
-                    $ip = trim(explode(',', $ip)[0]);
-                }
-                return $ip;
-            }
-        }
-
-        return null;
+        $ip = RequestSecurity::getClientIp($_SERVER);
+        return $ip === '0.0.0.0' ? null : $ip;
     }
 }

@@ -24,7 +24,7 @@ class Router
     private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
     private PdoConnection $pdoConnection;
     private array $routeMiddleware = []; // ← esta línea
-    //private array $protectedRoutes = [];  // ← NUEVO: Array de rutas que requieren auth (e.g., ['/dashboard'])
+    private array $protectedRoutes = [];  // ← NUEVO: Array de rutas que requieren auth (e.g., ['/dashboard'])
 
     public function __construct(PdoConnection $pdoConnection) {
         $this->pdoConnection = $pdoConnection;

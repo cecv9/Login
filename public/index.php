@@ -7,7 +7,7 @@ declare(strict_types=1);
 ini_set('log_errors', '1');
 ini_set('error_log', dirname(__DIR__) . '/logs/php-errors.log');
 
-// ... resto de tu código
+
 use Enoc\Login\Core\Router;
 use Dotenv\Dotenv;
 use Enoc\Login\Core\LogManager;
@@ -17,6 +17,7 @@ use Enoc\Login\Core\DatabaseConnectionException;
 use Enoc\Login\Repository\UsuarioRepository;
 use Enoc\Login\Services\UserService;
 use Enoc\Login\Controllers\AdminController;
+use Enoc\Login\Core\RequestSecurity;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -136,7 +137,7 @@ function setSecurityHeaders(): void {
     header('X-XSS-Protection: 1; mode=block');
     
     // HSTS - Force HTTPS for 1 year (only send over HTTPS)
-    if (isHttps()) {
+    if (RequestSecurity::isHttps($_SERVER)) {
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     }
     
@@ -147,59 +148,7 @@ function setSecurityHeaders(): void {
 /**
  * 5) Sesión segura (mínimos recomendados)
  */
-/**
- * Detecta HTTPS considerando proxies y load balancers
- */
-function isHttps(): bool {
-    // 1. Detección estándar
-    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-        return true;
-    }
-
-    // 2. Puerto 443 (conexión directa)
-    if (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) {
-        return true;
-    }
-
-    // 3. Headers de proxies comunes
-
-    // X-Forwarded-Proto (Nginx, Apache, AWS ALB)
-    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
-        $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-        return true;
-    }
-
-    // X-Forwarded-SSL (algunos proxies)
-    if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) &&
-        $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on') {
-        return true;
-    }
-
-    // Cloudflare
-    if (!empty($_SERVER['HTTP_CF_VISITOR'])) {
-        $cloudflareVisitor = $_SERVER['HTTP_CF_VISITOR'];
-        $cloudflareData = json_decode($cloudflareVisitor, true);
-
-        if (json_last_error() === JSON_ERROR_NONE) {
-            if (($cloudflareData['scheme'] ?? null) === 'https') {
-                return true;
-            }
-        } elseif (preg_match('/"?scheme"?\s*[:=]\s*"?https"?/i', $cloudflareVisitor) === 1) {
-            return true;
-        }
-
-    }
-
-    // X-Forwarded-Port (algunos load balancers)
-    if (!empty($_SERVER['HTTP_X_FORWARDED_PORT']) &&
-        (int)$_SERVER['HTTP_X_FORWARDED_PORT'] === 443) {
-        return true;
-    }
-
-    return false;
-}
-
-$secure = isHttps();
+$secure = RequestSecurity::isHttps($_SERVER);
 
 //$domain = $_ENV['APP_DOMAIN'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
 //$domain = explode(':', $domain)[0]; // Remover puerto

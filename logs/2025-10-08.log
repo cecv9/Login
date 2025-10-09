@@ -263,3 +263,52 @@
 [2025-10-08 03:59:30] [INFO] Intentando actualizar usuario {"target_user_id":47,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T03:59:30+00:00"}
 [2025-10-08 03:59:30] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":47,"new_email":"qwwert@gmail.com","new_name":"dsasa","new_role":"bodeguero","password_changed":false,"old_email":"qwwert@gmail.com","old_name":"dsasadsa","old_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T03:59:30+00:00"}
 [2025-10-08 03:59:30] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:43] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:45] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:49] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:49] [WARNING] Failed login attempt {"email":"usu7@gmail.com","ip":"::1"}
+[2025-10-08 23:49:49] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:53] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:53] [WARNING] Failed login attempt {"email":"asumaquina@gmail.com","ip":"::1"}
+[2025-10-08 23:49:53] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:57] [INFO] Aplicación iniciada []
+[2025-10-08 23:49:57] [WARNING] Failed login attempt {"email":"asumaquina@gmail.com","ip":"::1"}
+[2025-10-08 23:49:57] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:00] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:00] [WARNING] Failed login attempt {"email":"asumaquina@gmail.com","ip":"::1"}
+[2025-10-08 23:50:00] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:07] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:07] [WARNING] Failed login attempt {"email":"usu7@gmail.com","ip":"::1"}
+[2025-10-08 23:50:07] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:12] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:12] [WARNING] Failed login attempt {"email":"locoo@gmail.com","ip":"::1"}
+[2025-10-08 23:50:12] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:18] [INFO] Aplicación iniciada []
+[2025-10-08 23:50:18] [WARNING] Failed login attempt {"email":"locoo@gmail.com","ip":"::1"}
+[2025-10-08 23:50:18] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:25] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:25] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-08 23:53:25] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:27] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:28] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:48] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:48] [INFO] Intentando crear usuario {"target_email":"saqwe@gmial.com","target_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:53:48+00:00"}
+[2025-10-08 23:53:48] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":52,"target_email":"saqwe@gmial.com","target_name":"saqwe","target_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:53:48+00:00"}
+[2025-10-08 23:53:48] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:52] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:54] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:54] [INFO] Intentando actualizar usuario {"target_user_id":52,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:53:54+00:00"}
+[2025-10-08 23:53:54] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":52,"new_email":"saqwe@gmial.com","new_name":"saqwe","new_role":"facturador","password_changed":false,"old_email":"saqwe@gmial.com","old_name":"saqwe","old_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:53:54+00:00"}
+[2025-10-08 23:53:54] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:56] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:57] [INFO] Aplicación iniciada []
+[2025-10-08 23:53:57] [INFO] Intentando eliminar usuario {"target_user_id":52,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:53:57+00:00"}
+[2025-10-08 23:53:57] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":52,"target_email":"saqwe@gmial.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:53:57+00:00"}
+[2025-10-08 23:53:57] [INFO] Aplicación iniciada []
+[2025-10-08 23:54:00] [INFO] Aplicación iniciada []
+[2025-10-08 23:54:01] [INFO] Aplicación iniciada []
+[2025-10-08 23:54:01] [INFO] Intentando eliminar usuario {"target_user_id":47,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:54:01+00:00"}
+[2025-10-08 23:54:01] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":47,"target_email":"qwwert@gmail.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-08T23:54:01+00:00"}
+[2025-10-08 23:54:01] [INFO] Aplicación iniciada []
+[2025-10-08 23:54:03] [INFO] Aplicación iniciada []
+[2025-10-08 23:54:03] [INFO] Aplicación iniciada []
