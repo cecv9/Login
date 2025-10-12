@@ -16,6 +16,8 @@ final class UserRole
      * Todos los roles disponibles en el sistema
      */
     public static function all(): array
+
+
     {
         return [
             self::ADMIN,

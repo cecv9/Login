@@ -1,0 +1,186 @@
+[2025-10-12 04:22:58] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:22:58] [ERROR] FrontController error: Class "Enoc\Login\Core\Domain\Request" not found []
+[2025-10-12 04:22:58] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:22:58] [ERROR] FrontController error: Class "Enoc\Login\Core\Domain\Request" not found []
+[2025-10-12 04:27:31] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:27:31] [ERROR] FrontController error: Class "Enoc\Login\Core\Domain\Request" not found []
+[2025-10-12 04:27:53] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:27:53] [ERROR] FrontController error: Class "Enoc\Login\Core\Domain\Request" not found []
+[2025-10-12 04:30:09] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:30:09] [ERROR] FrontController error: Call to private method Enoc\Login\Core\Router::executeHandler() from scope Enoc\Login\Core\FrontController []
+[2025-10-12 04:35:52] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:35:52] [ERROR] FrontController error: Call to private method Enoc\Login\Core\Router::executeHandler() from scope Enoc\Login\Core\FrontController []
+[2025-10-12 04:41:28] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:41:28] [ERROR] FrontController error: Call to private method Enoc\Login\Core\Router::executeHandler() from scope Enoc\Login\Core\FrontController []
+[2025-10-12 04:43:00] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:05] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:30] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:30] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-12 04:43:30] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:41] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:43] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:43] [INFO] Intentando eliminar usuario {"target_user_id":22,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:43:43+00:00"}
+[2025-10-12 04:43:43] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":22,"target_email":"usu1@gmail.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:43:43+00:00"}
+[2025-10-12 04:43:43] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:48] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:49] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:43:49] [INFO] Intentando eliminar usuario {"target_user_id":53,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:43:49+00:00"}
+[2025-10-12 04:43:49] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":53,"target_email":"marga@gmail.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:43:49+00:00"}
+[2025-10-12 04:43:49] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:45:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:45:14] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:45:22] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:45:22] [INFO] Intentando actualizar usuario {"target_user_id":25,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:45:22+00:00"}
+[2025-10-12 04:45:22] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":25,"new_email":"usu4@gmail.com","new_name":"usuariopeper","new_role":"user","password_changed":false,"old_email":"usu4@gmail.com","old_name":"usuario4","old_role":"user","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:45:22+00:00"}
+[2025-10-12 04:45:22] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:04] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:09] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:09] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:09] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:09] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:10] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:10] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:21] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:24] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:25] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:57:25] [INFO] Intentando eliminar usuario {"target_user_id":25,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:57:25+00:00"}
+[2025-10-12 04:57:25] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":25,"target_email":"usu4@gmail.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T04:57:25+00:00"}
+[2025-10-12 04:57:25] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:59:18] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:59:20] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:59:20] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:59:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:59:32] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-12 04:59:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 04:59:34] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:01:21] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:04:52] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:04:55] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:05:17] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:05:17] [INFO] Intentando crear usuario {"target_email":"api@tyre.com","target_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:05:17+00:00"}
+[2025-10-12 05:05:18] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":54,"target_email":"api@tyre.com","target_name":"API","target_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:05:18+00:00"}
+[2025-10-12 05:05:18] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:05:22] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:05:25] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:05:25] [INFO] Intentando actualizar usuario {"target_user_id":54,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:05:25+00:00"}
+[2025-10-12 05:05:25] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":54,"new_email":"api@tyre.com","new_name":"API","new_role":"facturador","password_changed":false,"old_email":"api@tyre.com","old_name":"API","old_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:05:25+00:00"}
+[2025-10-12 05:05:25] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:08:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:08:35] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:08:40] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:08:40] [INFO] Intentando actualizar usuario {"target_user_id":54,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:08:40+00:00"}
+[2025-10-12 05:08:40] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":54,"new_email":"api@tyre.com","new_name":"terres","new_role":"facturador","password_changed":false,"old_email":"api@tyre.com","old_name":"API","old_role":"facturador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:08:40+00:00"}
+[2025-10-12 05:08:40] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:12:40] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:12:40] [ERROR] FrontController infrastructure error: str_contains(): Argument #1 ($haystack) must be of type string, null given Trace: #0 /home/enoc/Login/app/Core/Router.php(292): str_contains() #1 /home/enoc/Login/app/Core/FrontController.php(81): Enoc\Login\Core\Router->executeHandler() #2 /home/enoc/Login/public/index.php(210): Enoc\Login\Core\FrontController->handle() #3 {main} []
+[2025-10-12 05:17:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:12] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:12] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:32] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-12 05:17:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:34] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:35] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:52] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:52] [INFO] Intentando crear usuario {"target_email":"pata@pepe.com","target_role":"user","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:17:52+00:00"}
+[2025-10-12 05:17:53] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":55,"target_email":"pata@pepe.com","target_name":"Patagoinia","target_role":"user","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:17:53+00:00"}
+[2025-10-12 05:17:53] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:17:57] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:18:00] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:18:00] [INFO] Intentando actualizar usuario {"target_user_id":55,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:18:00+00:00"}
+[2025-10-12 05:18:00] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":55,"new_email":"pata@pepe.com","new_name":"Patagoini","new_role":"user","password_changed":false,"old_email":"pata@pepe.com","old_name":"Patagoinia","old_role":"user","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:18:00+00:00"}
+[2025-10-12 05:18:00] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:18:02] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:18:03] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:18:03] [INFO] Intentando eliminar usuario {"target_user_id":55,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:18:03+00:00"}
+[2025-10-12 05:18:03] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":55,"target_email":"pata@pepe.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:18:03+00:00"}
+[2025-10-12 05:18:03] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:32] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:33] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:33] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:33] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:33] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:34] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:34] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:38] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:39] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:27:39] [INFO] Intentando eliminar usuario {"target_user_id":54,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:27:39+00:00"}
+[2025-10-12 05:27:39] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":54,"target_email":"api@tyre.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:27:39+00:00"}
+[2025-10-12 05:27:39] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:30:02] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:30:20] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:30:20] [INFO] Intentando crear usuario {"target_email":"arena@gamil.com","target_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:30:20+00:00"}
+[2025-10-12 05:30:20] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":56,"target_email":"arena@gamil.com","target_name":"tony saca","target_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:30:20+00:00"}
+[2025-10-12 05:30:20] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:31:03] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:31:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:31:11] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:31:16] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:31:17] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:36:53] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:37:10] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:37:11] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:37:11] [INFO] Intentando eliminar usuario {"target_user_id":56,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:37:11+00:00"}
+[2025-10-12 05:37:11] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":56,"target_email":"arena@gamil.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:37:11+00:00"}
+[2025-10-12 05:37:11] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:44:17] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:45:01] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:45:01] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:46:35] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:49:30] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:49:49] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:49:50] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-12 05:49:50] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:49:52] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:49:55] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:50:14] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:50:14] [INFO] Intentando crear usuario {"target_email":"hill@gmail.com","target_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:50:14+00:00"}
+[2025-10-12 05:50:14] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":57,"target_email":"hill@gmail.com","target_name":"Hillsong","target_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T05:50:14+00:00"}
+[2025-10-12 05:50:14] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:50:41] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:50:41] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:54:36] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 05:54:36] [ERROR] FrontController infrastructure error {"exception_type":"LogicException","message":"Handler 'string' MUST return Response object, returned: string","file":"/home/enoc/Login/app/Core/FrontController.php","line":160,"trace":"#0 /home/enoc/Login/app/Core/FrontController.php(95): Enoc\\Login\\Core\\FrontController->executeRoute()\n#1 /home/enoc/Login/public/index.php(282): Enoc\\Login\\Core\\FrontController->handle()\n#2 {main}","request_uri":"/login"}
+[2025-10-12 05:58:00] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:02:41] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:03:33] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:03:46] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:06:20] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:06:52] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:06:52] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuthController@showLogin"}
+[2025-10-12 06:07:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:07] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-12 06:07:07] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:07] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"DashboardController@show"}
+[2025-10-12 06:07:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:08] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@index"}
+[2025-10-12 06:07:10] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:10] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@edit"}
+[2025-10-12 06:07:14] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:14] [INFO] Intentando actualizar usuario {"target_user_id":57,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T06:07:14+00:00"}
+[2025-10-12 06:07:14] [INFO] ✅ Usuario actualizado exitosamente {"action":"USER_UPDATED","target_user_id":57,"new_email":"hill@gmail.com","new_name":"refdevsd","new_role":"bodeguero","password_changed":false,"old_email":"hill@gmail.com","old_name":"Hillsong","old_role":"bodeguero","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T06:07:14+00:00"}
+[2025-10-12 06:07:14] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:14] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@index"}
+[2025-10-12 06:07:16] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:16] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@delete"}
+[2025-10-12 06:07:17] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:17] [INFO] Intentando eliminar usuario {"target_user_id":57,"actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T06:07:17+00:00"}
+[2025-10-12 06:07:17] [INFO] ✅ Usuario eliminado exitosamente {"target_user_id":57,"target_email":"hill@gmail.com","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T06:07:17+00:00"}
+[2025-10-12 06:07:17] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:17] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@index"}
+[2025-10-12 06:07:18] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:18] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@create"}
+[2025-10-12 06:07:35] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:35] [INFO] Intentando crear usuario {"target_email":"pez@gmail.com","target_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T06:07:35+00:00"}
+[2025-10-12 06:07:35] [INFO] ✅ Usuario creado exitosamente {"action":"USER_CREATED","target_user_id":58,"target_email":"pez@gmail.com","target_name":"pecesito","target_role":"liquidador","actor_user_id":39,"actor_username":"CarlosAdmin","actor_email":"admin@admin.com","ip_address":"::1","user_agent":"Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","timestamp":"2025-10-12T06:07:35+00:00"}
+[2025-10-12 06:07:35] [INFO] Aplicación iniciada con FrontController []
+[2025-10-12 06:07:35] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@index"}

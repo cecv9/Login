@@ -1,45 +1,120 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Router - Sistema de Enrutamiento HTTP
+ *
+ * ============================================================================
+ * 🎯 PROPÓSITO: Mapear URLs a Controladores y soportar FrontController
+ * ============================================================================
+ *
+ * Este Router mantiene COMPATIBILIDAD TOTAL con tu código existente
+ * y añade soporte para el nuevo FrontController sin breaking changes.
+ *
+ * ============================================================================
+ * 🔄 MODO LEGACY (tu código actual):
+ * ============================================================================
+ * // public/index.php - SIN CAMBIOS
+ * $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+ *
+ * ============================================================================
+ * 🆕 MODO FRONTCONTROLLER (nuevo):
+ * ============================================================================
+ * // public/index.php - CON NUEVA ARQUITECTURA
+ * $route = $router->match($request->method, $request->getPath());
+ * if ($route) {
+ *     $response = $router->executeHandler($route->handler, $request);
+ * }
+ *
+ * ============================================================================
+ * ⚡ CARACTERÍSTICAS CLAVE
+ * ============================================================================
+ *
+ * ✅ Backward compatibility 100%
+ * ✅ Cache de Route objects
+ * ✅ Soporte para Dependency Injection futuro
+ * ✅ Middleware pipeline intacto
+ * ✅ Manejo completo de errores
+ * ✅ HTTP methods validation
+ * ✅ Protected routes support
+ *
+ * @package Enoc\Login\Core
+ * @author Enoc (HTTP Router with FrontController Support)
+ * @version 2.0.0 (backward compatible)
+ */
 namespace Enoc\Login\Core;
 
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Middleware\MiddlewareFactory;
-;
 
 class Router
 {
+    /**
+     * @var array<string, array<string, mixed>> Routes storage [$method][$path] = $handler
+     */
+    private array $routes = [];
+
+    /**
+     * @var string Namespace base para controllers
+     */
+    private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
+
+    /**
+     * @var PdoConnection Conexión a BD (legacy compatibility)
+     */
+    private PdoConnection $pdoConnection;
+
+    /**
+     * @var array<string, array<string, array<string>>> Middleware por ruta [$method][$path] = [$middleware]
+     */
+    private array $routeMiddleware = [];
+
+    /**
+     * @var string[] Rutas protegidas
+     */
+    private array $protectedRoutes = [];
+
+    /**
+     * Cache de Route objects para FrontController (evita recreación)
+     *
+     * @var array<string, array<string, Route>>
+     */
+    private array $routeObjects = [];
+
+    /**
+     * HTTP Methods válidos
+     */
     private const VALID_HTTP_METHODS = [
-        'GET',
-        'POST',
-        'PUT',
-        'PATCH',
-        'DELETE',
-        'OPTIONS',
-        'HEAD',
-        'CONNECT',
-        'TRACE',
+        'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD', 'CONNECT', 'TRACE',
     ];
 
-    private array $routes = [];
-    private string $controllerNamespace = "Enoc\\Login\\Controllers\\";
-    private PdoConnection $pdoConnection;
-    private array $routeMiddleware = []; // ← esta línea
-    private array $protectedRoutes = [];  // ← NUEVO: Array de rutas que requieren auth (e.g., ['/dashboard'])
-
-    public function __construct(PdoConnection $pdoConnection) {
+    /**
+     * Constructor - Mantenido para legacy compatibility
+     *
+     * @param PdoConnection $pdoConnection Conexión legacy
+     */
+    public function __construct(PdoConnection $pdoConnection)
+    {
         $this->pdoConnection = $pdoConnection;
     }
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 📝 TU CÓDIGO EXACTAMENTE IGUAL (SIN MODIFICACIONES)
+    // ─────────────────────────────────────────────────────────────────────────────
+
     /**
      * Cargar rutas desde archivo de configuración
+     *
+     * @param string $routesFile Path al archivo de rutas
+     * @throws \Exception Si archivo no existe o formato inválido
      */
-    public function loadRoutes(string $routesFile): void {
-
+    public function loadRoutes(string $routesFile): void
+    {
         if (!file_exists($routesFile)) {
             throw new \Exception("Archivo de rutas no encontrado: {$routesFile}");
         }
 
-        //$this->routes = require $routesFile;
         $routes = require $routesFile;
 
         if (!is_array($routes)) {
@@ -65,7 +140,6 @@ class Router
                 );
             }
 
-            //$normalizedRoutes[$normalizedMethod] = $routesForMethod;
             $normalizedRoutesForMethod = [];
 
             foreach ($routesForMethod as $path => $handler) {
@@ -94,29 +168,41 @@ class Router
             }
 
             $normalizedRoutes[$normalizedMethod] = $normalizedRoutesForMethod;
-
         }
 
         $this->routes = $normalizedRoutes;
     }
 
-
-// NUEVO: Método para marcar rutas como protegidas (llamar en loadRoutes o constructor)
-    public function protectRoute(string $path): void {
+    /**
+     * Marcar rutas como protegidas
+     *
+     * @param string $path Ruta a proteger
+     */
+    public function protectRoute(string $path): void
+    {
         $this->protectedRoutes[] = rtrim($path, '/') ?: '/';
     }
 
+    /**
+     * Asignar middleware a ruta
+     *
+     * @param string $method Método HTTP
+     * @param string $path Ruta
+     * @param array $middlewareList Lista de middleware keys
+     */
     public function middleware(string $method, string $path, array $middlewareList): void
     {
         $method = strtoupper($method);
-        $path   = rtrim($path, '/') ?: '/';
+        $path = rtrim($path, '/') ?: '/';
         $this->routeMiddleware[$method][$path] = $middlewareList;
     }
 
-
-
     /**
-     * Procesar la petición actual
+     * Procesar la petición actual (tu método original)
+     *
+     * @param string $requestUri URI solicitado
+     * @param string $requestMethod Método HTTP
+     * @return mixed Response
      */
     public function dispatch(string $requestUri, string $requestMethod): mixed
     {
@@ -126,7 +212,7 @@ class Router
             return $this->notFound();
         }
         $path = $parsedPath ?? '';
-        $uri  = rtrim($path, '/') ?: '/';
+        $uri = rtrim($path, '/') ?: '/';
 
         // 2) Override de método vía _method en POST (PUT/PATCH/DELETE)
         $method = strtoupper($requestMethod);
@@ -181,11 +267,14 @@ class Router
         return $this->notFound();
     }
 
-
     /**
      * Ejecutar el handler (closure o controlador)
+     *
+     * @param mixed $handler Handler a ejecutar
+     * @return mixed Response
+     * @throws \Exception Si handler inválido
      */
-    private function executeHandler(mixed $handler): mixed
+    public function executeHandler(mixed $handler): mixed
     {
         // Closure/función
         if (is_callable($handler)) {
@@ -207,42 +296,52 @@ class Router
         throw new \Exception("Handler inválido para la ruta");
     }
 
-
     /**
      * Ejecutar método de controlador
+     *
+     * @param string $handler String "Controller@method"
+     * @return mixed Response
+     * @throws \Exception Si controller/método no existe
      */
-    private function executeControllerMethod(string $handler): mixed {
-    [$controller, $method] = explode('@', $handler);
-    $controllerClass = $this->controllerNamespace . $controller;
+    private function executeControllerMethod(string $handler): mixed
+    {
+        [$controller, $method] = explode('@', $handler);
+        $controllerClass = $this->controllerNamespace . $controller;
 
-    if (!class_exists($controllerClass)) {
-        throw new \Exception("Controlador {$controllerClass} no existe");
+        if (!class_exists($controllerClass)) {
+            throw new \Exception("Controlador {$controllerClass} no existe");
+        }
+
+        $instance = new $controllerClass($this->pdoConnection);
+
+        if (!method_exists($instance, $method)) {
+            throw new \Exception("Método {$method} no existe en {$controllerClass}");
+        }
+
+        return $instance->$method();
     }
-
-    $instance = new $controllerClass($this->pdoConnection);
-
-    if (!method_exists($instance, $method)) {
-        throw new \Exception("Método {$method} no existe en {$controllerClass}");
-    }
-
-    return $instance->$method();
-}
-
 
     /**
      * Manejar error 405 Method Not Allowed
+     *
+     * @param array $allowedMethods Métodos permitidos
+     * @return string Error message
      */
-    private function methodNotAllowed(array $allowedMethods): string {
+    private function methodNotAllowed(array $allowedMethods): string
+    {
         http_response_code(405);
         header('Allow: ' . implode(', ', $allowedMethods));
-
         return '405 Method Not Allowed';
     }
 
     /**
      * Obtener métodos permitidos para un URI
+     *
+     * @param string $uri URI a consultar
+     * @return array<string> Métodos permitidos
      */
-    private function findAllowedMethods(string $uri): array {
+    private function findAllowedMethods(string $uri): array
+    {
         $allowedMethods = [];
 
         foreach ($this->routes as $method => $routes) {
@@ -254,22 +353,66 @@ class Router
         return $allowedMethods;
     }
 
-
-
-
+    // ─────────────────────────────────────────────────────────────────────────────
+    // ✅ NUEVOS: Métodos para FrontController (COMPATIBLES CON LEGACY)
+    // ─────────────────────────────────────────────────────────────────────────────
 
     /**
-     * Manejar error 404
+     * ✅ Match para FrontController - Buscar ruta específica
+     *
+     * Este método es exclusivo para el nuevo FrontController
+     * Mantiene la misma lógica interna que dispatch() pero sin ejecutar
+     *
+     * @param string $method Método HTTP
+     * @param string $path Ruta solicitada
+     * @return Route|null Objeto Route si existe, null si no
+     *
+     * @example
+     * $route = $router->match('GET', '/users');
+     * if ($route) {
+     *     echo "Handler: " . $route->handler; // "UserController@index"
+     * }
      */
-    private function notFound(): string  {
+    public function match(string $method, string $path): ?Route
+    {
+        $normalizedPath = rtrim(parse_url($path, PHP_URL_PATH) ?: '/', '/') ?: '/';
+        $method = strtoupper($method);
+
+        // Reusar tu lógica de routing existente (100% compatible)
+        if (isset($this->routes[$method][$normalizedPath])) {
+            // Caching para evitar recrear objetos Route repetidamente
+            if (!isset($this->routeObjects[$method][$normalizedPath])) {
+                $this->routeObjects[$method][$normalizedPath] = new Route(
+                    method: $method,
+                    path: $normalizedPath,
+                    handler: $this->routes[$method][$normalizedPath],
+                    middleware: $this->routeMiddleware[$method][$normalizedPath] ?? []
+                );
+            }
+            return $this->routeObjects[$method][$normalizedPath];
+        }
+
+        return null;
+    }
+
+    /**
+     * ✅ Manejador de 404 - Ahora público para FrontController
+     *
+     * @return string HTML de error 404
+     */
+    public function notFound(): string
+    {
         http_response_code(404);
         return $this->render404();
     }
 
     /**
      * Renderizar página 404 básica
+     *
+     * @return string HTML
      */
-    private function render404(): string  {
+    private function render404(): string
+    {
         return '
         <!DOCTYPE html>
         <html lang="es">
@@ -288,5 +431,160 @@ class Router
         </body>
         </html>';
     }
+}
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ✅ NUEVO: Route Value Object (mismo namespace, archivo separado pero mismo fichero)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Route - Value Object para Enrutamiento
+ *
+ * ============================================================================
+ * 🎯 PROPÓSITO: DTO encapsular información de ruta HTTP
+ * ============================================================================
+ *
+ * Objeto simple e inmutable que representa una ruta registrada
+ * Usado exclusivamente por FrontController para separar concerns
+ *
+ * ============================================================================
+ * 🚀 EJEMPLOS DE USO
+ * ============================================================================
+ *
+ * $route = new Route(
+ *     method: 'GET',
+ *     path: '/users',
+ *     handler: 'UserController@index',
+ *     middleware: ['auth', 'role:admin']
+ * );
+ *
+ * echo $route->method;           // "GET"
+ * echo $route->path;             // "/users"
+ * echo $route->hasAuth();        // true
+ * echo $route->getRoles();       // ["admin"]
+ *
+ * ============================================================================
+ * ⚡ CARACTERÍSTICAS
+ * ============================================================================
+ *
+ * ✅ Inmutable (readonly properties)
+ * ✅ Type Safety con constructor properties
+ * ✅ Métodos helper comunes
+ * ✅ Compatible con FrontController
+ *
+ * @package Enoc\Login\Core
+ * @internal Solo para uso interno de Router/FrontController
+ * @author Enoc (Route DTO)
+ * @version 1.0.0
+ */
+class Route
+{
+    /**
+     * Constructor con propiedades readonly (inmutables)
+     *
+     * @param string $method      Método HTTP (GET, POST, etc.)
+     * @param string $path         Ruta normalizada
+     * @param mixed  $handler     Handler (Controller@method o Closure)
+     * @param array  $middleware  Lista de middleware keys
+     */
+    public function __construct(
+        public readonly string $method,        // 'GET', 'POST', etc.
+        public readonly string $path,           // '/users', '/dashboard', etc.
+        public readonly mixed $handler,         // 'UserController@index' o Closure
+        public readonly array $middleware = []  // ['auth', 'role:admin']
+    ) {}
+
+    /**
+     * ✅ Verificar si tiene middleware de autenticación
+     *
+     * @return bool true si requiere auth
+     */
+    public function hasAuth(): bool
+    {
+        return $this->hasMiddleware('auth');
+    }
+
+    /**
+     * ✅ Verificar si requiere rol específico
+     *
+     * @param string $role Rol a verificar
+     * @return bool true si requiere el rol
+     *
+     * @example
+     * if ($route->requiresRole('admin')) { // true si tiene 'role:admin'
+     *     // Check user has admin role...
+     * }
+     */
+    public function requiresRole(string $role): bool
+    {
+        return $this->hasMiddleware("role:{$role}");
+    }
+
+    /**
+     * ✅ Obtener roles requeridos
+     *
+     * @return array<string> Lista de roles, ej: ['admin', 'editor']
+     */
+    public function getRequiredRoles(): array
+    {
+        $roles = [];
+        foreach ($this->middleware as $middleware) {
+            if (str_starts_with($middleware, 'role:')) {
+                $roles[] = substr($middleware, 5); // Remover 'role:' prefix
+            }
+        }
+        return $roles;
+    }
+
+    /**
+     * ✅ Verificar si tiene un middleware específico
+     *
+     * @param string $middleware Key del middleware
+     * @return bool true si lo tiene
+     */
+    public function hasMiddleware(string $middleware): bool
+    {
+        return in_array($middleware, $this->middleware, true);
+    }
+
+    /**
+     * ✅ Obtener middleware por tipo
+     *
+     * @param string $type Tipo de middleware, ej: 'role', 'throttle'
+     * @return array<string> Lista de middleware del tipo
+     */
+    public function getMiddlewareByType(string $type): array
+    {
+        return array_filter($this->middleware, fn($m) => str_starts_with($m, $type));
+    }
+
+    /**
+     * ✅ Verificar si es GET
+     *
+     * @return bool true si GET
+     */
+    public function isGet(): bool
+    {
+        return $this->method === 'GET';
+    }
+
+    /**
+     * ✅ Verificar si es POST
+     *
+     * @pro retorno bool true si POST
+     */
+    public function isPost(): bool
+    {
+        return $this->method === 'POST';
+    }
+
+    /**
+     * ✅ Representación en string (debugging)
+     *
+     * @return string Formato: "GET /users"
+     */
+    public function __toString(): string
+    {
+        return "{$this->method} {$this->path}";
+    }
 }
