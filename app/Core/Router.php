@@ -477,7 +477,21 @@ class Router
     {
         $normalizedPath = rtrim(parse_url($path, PHP_URL_PATH) ?: '/', '/') ?: '/';
         $method = strtoupper($method);
+        
+        // Soporte a override de método vía _method en POST (igual que en dispatch)
+    if ($method === 'POST' && isset($_POST['_method'])) {
+        $override = strtoupper((string)$_POST['_method']);
+        if (in_array($override, ['PUT','PATCH','DELETE'], true)) {
+            $method = $override;
+        }
+    }
 
+    // HEAD → GET fallback (igual que en dispatch)
+    if ($method === 'HEAD') {
+        $method = 'GET';
+    }
+
+    
         // Reusar tu lógica de routing existente (100% compatible)
         if (isset($this->routes[$method][$normalizedPath])) {
             // Caching para evitar recrear objetos Route repetidamente

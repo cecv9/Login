@@ -6,6 +6,7 @@ namespace Enoc\Login\Core;
 
 use Enoc\Login\Core\Domain\Request;
 use Enoc\Login\Core\Domain\Response;
+use Enoc\Login\Middleware\MiddlewareFactory;
 
 /**
  * FrontController - Orquestador con MODO TRANSICIÓN
@@ -28,10 +29,19 @@ class FrontController
             // 2️⃣ Routing
             $route = $this->router->match($request->method, $request->getPath());
 
+               // 3) Si no hay ruta, responder 404 y salir
             if (!$route) {
                 $this->handleNotFound();
                 return;
             }
+        
+            // 4) Ejecutar los middlewares declarados para ESTA ruta
+        //    Importante:
+        //    - Tus middlewares actuales tienen firma ->handle() sin $next.
+        //    - Si necesitan cortar el flujo (redirigir o forbiden), lo harán aquí (exit/return).
+        foreach ($route->getMiddleware() as $key) {
+            MiddlewareFactory::make($key)->handle();
+        }
 
             // 3️⃣ Ejecutar handler (legacy or modern)
             $response = $this->router->executeHandler($route->handler, $request);
