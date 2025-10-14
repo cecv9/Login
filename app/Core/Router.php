@@ -45,6 +45,7 @@ declare(strict_types=1);
  */
 namespace Enoc\Login\Core;
 
+use Enoc\Login\Core\Domain\Request;
 use Enoc\Login\Core\PdoConnection;
 use Enoc\Login\Middleware\MiddlewareFactory;
 
@@ -54,6 +55,8 @@ class Router
      * @var array<string, array<string, mixed>> Routes storage [$method][$path] = $handler
      */
     private array $routes = [];
+
+     private ?DependencyContainer $container = null;
 
     /**
      * @var string Namespace base para controllers
@@ -97,6 +100,11 @@ class Router
     public function __construct(PdoConnection $pdoConnection)
     {
         $this->pdoConnection = $pdoConnection;
+    }
+
+     public function setContainer(DependencyContainer $container): void
+    {
+        $this->container = $container;
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -274,12 +282,12 @@ class Router
      * @return mixed Response
      * @throws \Exception Si handler inválido
      */
-    public function executeHandler(mixed $handler): mixed
+   public function executeHandler(mixed $handler, ?Request $request = null): mixed
     {
         // Closure/función
         if (is_callable($handler)) {
             try {
-                return \call_user_func($handler);
+                return $this->invokeCallable($handler, $request);
             } catch (\Throwable $e) {
                 \Enoc\Login\Core\LogManager::logError('Route closure exception: '.$e->getMessage());
                 http_response_code(500);
@@ -290,7 +298,7 @@ class Router
 
         // "Controller@method"
         if (is_string($handler) && str_contains($handler, '@')) {
-            return $this->executeControllerMethod($handler);
+           return $this->executeControllerMethod($handler, $request);
         }
 
         throw new \Exception("Handler inválido para la ruta");
@@ -303,7 +311,7 @@ class Router
      * @return mixed Response
      * @throws \Exception Si controller/método no existe
      */
-    private function executeControllerMethod(string $handler): mixed
+    private function executeControllerMethod(string $handler, ?Request $request): mixed
     {
         [$controller, $method] = explode('@', $handler);
         $controllerClass = $this->controllerNamespace . $controller;
@@ -311,14 +319,15 @@ class Router
         if (!class_exists($controllerClass)) {
             throw new \Exception("Controlador {$controllerClass} no existe");
         }
-
-        $instance = new $controllerClass($this->pdoConnection);
+            $instance = $this->resolveController($controllerClass);    
 
         if (!method_exists($instance, $method)) {
             throw new \Exception("Método {$method} no existe en {$controllerClass}");
         }
 
-        return $instance->$method();
+        $arguments = $this->resolveMethodArguments($instance, $method, $request);
+
+        return $instance->$method(...$arguments);
     }
 
     /**
@@ -352,6 +361,97 @@ class Router
 
         return $allowedMethods;
     }
+
+    private function invokeCallable(callable $handler, ?Request $request): mixed
+    {
+        $parameters = $this->getCallableParameters($handler);
+        $arguments = $this->resolveParameters($parameters, $request);
+
+        return $handler(...$arguments);
+    }
+
+    private function resolveController(string $controllerClass): object
+    {
+        if ($this->container instanceof DependencyContainer) {
+            return $this->container->get($controllerClass);
+        }
+
+        return new $controllerClass($this->pdoConnection);
+    }
+
+    private function resolveMethodArguments(object $instance, string $method, ?Request $request): array
+    {
+        $reflection = new \ReflectionMethod($instance, $method);
+
+        return $this->resolveParameters($reflection->getParameters(), $request);
+    }
+
+    /**
+     * @param array<int, \ReflectionParameter> $parameters
+     */
+    private function resolveParameters(array $parameters, ?Request $request): array
+    {
+        if ($parameters === []) {
+            return [];
+        }
+
+        $arguments = [];
+
+        foreach ($parameters as $parameter) {
+            $arguments[] = $this->resolveParameterValue($parameter, $request);
+        }
+
+        return $arguments;
+    }
+
+    private function resolveParameterValue(\ReflectionParameter $parameter, ?Request $request): mixed
+    {
+        $type = $parameter->getType();
+
+        if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+            $typeName = $type->getName();
+
+            if ($request !== null && is_a($request, $typeName)) {
+                return $request;
+            }
+
+            if ($this->container instanceof DependencyContainer) {
+                return $this->container->get($typeName);
+            }
+
+            if ($typeName === PdoConnection::class) {
+                return $this->pdoConnection;
+            }
+        }
+
+        if ($parameter->isDefaultValueAvailable()) {
+            return $parameter->getDefaultValue();
+        }
+
+        throw new \RuntimeException(
+            sprintf(
+                'No se pudo resolver el parámetro "%s" en %s',
+                $parameter->getName(),
+                $parameter->getDeclaringFunction()->getName()
+            )
+        );
+    }
+
+    private function getCallableParameters(callable $handler): array
+    {
+        if ($handler instanceof \Closure) {
+            $reflection = new \ReflectionFunction($handler);
+        } elseif (is_array($handler)) {
+            $reflection = new \ReflectionMethod($handler[0], $handler[1]);
+        } elseif (is_string($handler)) {
+            $reflection = new \ReflectionFunction($handler);
+        } else {
+            $reflection = new \ReflectionFunction(\Closure::fromCallable($handler));
+        }
+
+        return $reflection->getParameters();
+    }
+
 
     // ─────────────────────────────────────────────────────────────────────────────
     // ✅ NUEVOS: Métodos para FrontController (COMPATIBLES CON LEGACY)

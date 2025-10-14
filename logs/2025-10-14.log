@@ -1,0 +1,27 @@
+[2025-10-14 01:46:51] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:46:51] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"Closure"}
+[2025-10-14 01:46:51] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:46:52] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:46:52] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuthController@showLogin"}
+[2025-10-14 01:47:06] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:06] [INFO] Successful login {"email":"admin@admin.com"}
+[2025-10-14 01:47:06] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:06] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"DashboardController@show"}
+[2025-10-14 01:47:08] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:08] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AdminController@index"}
+[2025-10-14 01:47:10] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:10] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@index"}
+[2025-10-14 01:47:18] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:18] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@index"}
+[2025-10-14 01:47:25] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:25] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@index"}
+[2025-10-14 01:47:37] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:37] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@userActions"}
+[2025-10-14 01:47:41] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:41] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@userActions"}
+[2025-10-14 01:47:50] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:50] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@userActions"}
+[2025-10-14 01:47:56] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:47:56] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@userActions"}
+[2025-10-14 01:48:02] [INFO] Aplicación iniciada con FrontController []
+[2025-10-14 01:48:02] [INFO] LegacyController {"message":"String response auto-converted to Response::html","handler":"AuditDashboardController@userHistory"}

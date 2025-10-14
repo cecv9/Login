@@ -177,3 +177,42 @@ td:last-child a[href*="delete"]:hover {
 .has-error input, .has-error select { border-color: red; }  /* Input rojo */
 .error-text { color: red; font-size: 0.8em; display: block; margin-top: 2px; }  /* Mensaje pequeño bajo input */
 .field-error { color: red; background: #ffe; padding: 10px; margin: 10px 0; border: 1px solid red; }  /* Error global por campo */
+.confirmation-box {
+    border: 1px solid #dddddd;
+    padding: 15px;
+    margin: 10px 0;
+    background: #f9f9f9;
+    border-radius: 6px;
+}
+
+.warning {
+    color: #ff9800;
+    font-style: italic;
+}
+
+.btn-danger,
+.btn-cancel {
+    display: inline-block;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+    color: #ffffff;
+    margin-right: 10px;
+    transition: background 0.3s ease;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-cancel {
+    background: #6c757d;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+}

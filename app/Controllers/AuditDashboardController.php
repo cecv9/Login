@@ -10,12 +10,43 @@ class AuditDashboardController extends BaseController
 {
     private LogAnalyzer $analyzer;
 
-    public function __construct(PdoConnection $pdoConnection)
-    {
+    public function __construct(PdoConnection $pdoConnection){
         // BaseController no tiene constructor, así que no necesitas llamar parent::__construct()
         $logPath = $_ENV['LOG_PATH'] ?? dirname(__DIR__, 2) . '/logs';
         $this->analyzer = new LogAnalyzer($logPath);
     }
+
+    private function sanitizeDate(?string $value): ?string{
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return null;
+        }
+
+        $date = \DateTimeImmutable::createFromFormat('Y-m-d', $value);
+
+        if ($date === false) {
+            return null;
+        }
+
+        return $date->format('Y-m-d');
+    }
+
+    private function ensureValidRange(string $start, string $end): bool
+    {
+        return $start <= $end;
+    }
+
+    private function redirectWithInvalidDate(string $target): void
+    {
+        $_SESSION['error'] = 'El formato de fecha proporcionado no es válido.';
+        $this->redirect($target);
+    }
+
     private function assertAdminAccess(): void
     {
         if (($_SESSION['user_role'] ?? null) === 'admin') {
@@ -35,8 +66,18 @@ class AuditDashboardController extends BaseController
     {
         $this->assertAdminAccess();
 
-        $startDate = $_GET['start'] ?? date('Y-m-d', strtotime('-7 days'));
-        $endDate = $_GET['end'] ?? date('Y-m-d');
+        $startInput = $_GET['start'] ?? null;
+        $endInput = $_GET['end'] ?? null;
+
+        $startDate = $this->sanitizeDate($startInput) ?? date('Y-m-d', strtotime('-7 days'));
+        $endDate = $this->sanitizeDate($endInput) ?? date('Y-m-d');
+
+        if (($startInput !== null && $this->sanitizeDate($startInput) === null) ||
+            ($endInput !== null && $this->sanitizeDate($endInput) === null) ||
+            !$this->ensureValidRange($startDate, $endDate)) {
+            $this->redirectWithInvalidDate('/admin/audit');
+        }
+       
 
         $report = $this->analyzer->generateAuditReport($startDate, $endDate);
         $suspicious = $this->analyzer->detectSuspiciousActivity($endDate);
@@ -64,7 +105,12 @@ class AuditDashboardController extends BaseController
             $this->redirect('/admin/audit');
         }
 
-        $date = $_GET['date'] ?? null;
+       $dateInput = $_GET['date'] ?? null;
+        $date = $this->sanitizeDate($dateInput);
+
+        if ($dateInput !== null && $date === null) {
+            $this->redirectWithInvalidDate('/admin/audit/user?id=' . urlencode((string) $userId));
+        }
         $actions = $this->analyzer->getUserActions($userId, $date);
 
         return $this->view('admin.audit.user-actions', [
@@ -88,8 +134,17 @@ class AuditDashboardController extends BaseController
             $this->redirect('/admin/audit');
         }
 
-        $start = $_GET['start'] ?? date('Y-m-d', strtotime('-30 days'));
-        $end = $_GET['end'] ?? date('Y-m-d');
+        $startInput = $_GET['start'] ?? null;
+        $endInput = $_GET['end'] ?? null;
+
+        $start = $this->sanitizeDate($startInput) ?? date('Y-m-d', strtotime('-30 days'));
+        $end = $this->sanitizeDate($endInput) ?? date('Y-m-d');
+
+        if (($startInput !== null && $this->sanitizeDate($startInput) === null) ||
+            ($endInput !== null && $this->sanitizeDate($endInput) === null) ||
+            !$this->ensureValidRange($start, $end)) {
+            $this->redirectWithInvalidDate('/admin/audit/history?id=' . urlencode((string) $targetId));
+        }
 
         $history = $this->analyzer->getTargetUserHistory($targetId, $start, $end);
 
@@ -113,8 +168,17 @@ class AuditDashboardController extends BaseController
             exit;
         }
 
-        $start = $_GET['start'] ?? date('Y-m-d', strtotime('-7 days'));
-        $end = $_GET['end'] ?? date('Y-m-d');
+        $startInput = $_GET['start'] ?? null;
+        $endInput = $_GET['end'] ?? null;
+
+        $start = $this->sanitizeDate($startInput) ?? date('Y-m-d', strtotime('-7 days'));
+        $end = $this->sanitizeDate($endInput) ?? date('Y-m-d');
+
+        if (($startInput !== null && $this->sanitizeDate($startInput) === null) ||
+            ($endInput !== null && $this->sanitizeDate($endInput) === null) ||
+            !$this->ensureValidRange($start, $end)) {
+            $this->redirectWithInvalidDate('/admin/audit');
+        }
 
         $report = $this->analyzer->generateAuditReport($start, $end);
 

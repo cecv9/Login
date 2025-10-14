@@ -9,7 +9,26 @@ namespace Enoc\Login\Core;
  */
 final class LogAnalyzer
 {
-    public function __construct(private string $logPath) {}
+    private string $logPath;
+
+    public function __construct(string $logPath)
+    {
+        $realPath = realpath($logPath);
+
+        if ($realPath === false) {
+            if (!is_dir($logPath) && !@mkdir($logPath, 0775, true)) {
+                throw new \InvalidArgumentException('Ruta de logs inválida');
+            }
+
+            $realPath = realpath($logPath);
+        }
+
+        if ($realPath === false || !is_dir($realPath)) {
+            throw new \InvalidArgumentException('Ruta de logs inválida');
+        }
+
+        $this->logPath = $realPath;
+    }
 
     /**
      * Obtiene todas las acciones de un usuario específico
@@ -22,9 +41,9 @@ final class LogAnalyzer
         }
 
         $actions = [];
-        $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+       
 
-        foreach ($lines as $line) {
+        foreach ($this->readLogLines($logFile) as $line){
             if (preg_match('/\[.*?\] \[.*?\] (.*) (\{.*\})/', $line, $matches)) {
                 $context = json_decode($matches[2], true);
 
@@ -55,9 +74,9 @@ final class LogAnalyzer
                 continue;
             }
 
-            $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+            
 
-            foreach ($lines as $line) {
+           foreach ($this->readLogLines($logFile) as $line) {
                 if (preg_match('/\[.*?\] \[(.*?)\] (.*) (\{.*\})/', $line, $matches)) {
                     $level = $matches[1];
                     $message = $matches[2];
@@ -89,9 +108,9 @@ final class LogAnalyzer
         }
 
         $attempts = [];
-        $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+        
 
-        foreach ($lines as $line) {
+       foreach ($this->readLogLines($logFile) as $line) {
             if (str_contains($line, '[WARNING]') || str_contains($line, '[ERROR]')) {
                 if (preg_match('/\[.*?\] \[.*?\] (.*) (\{.*\})/', $line, $matches)) {
                     $context = json_decode($matches[2], true);
@@ -136,9 +155,9 @@ final class LogAnalyzer
                 continue;
             }
 
-            $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+           
 
-            foreach ($lines as $line) {
+             foreach ($this->readLogLines($logFile) as $line)  {
                 if (preg_match('/\[(.*?)\] \[(.*?)\] (.*?) (\{.*\})/', $line, $matches)) {
                     $timestamp = $matches[1];
                     $level = $matches[2];
@@ -222,8 +241,9 @@ final class LogAnalyzer
 
     private function getLogFile(?string $date = null): string
     {
-        $date = $date ?? date('Y-m-d');
-        return $this->logPath . '/' . $date . '.log';
+       $normalizedDate = $this->normalizeDate($date);
+
+        return $this->logPath . DIRECTORY_SEPARATOR . $normalizedDate . '.log';
     }
 
     private function getDateRange(?string $startDate, ?string $endDate): array
@@ -238,4 +258,44 @@ final class LogAnalyzer
 
         return $dates;
     }
+
+      private function normalizeDate(?string $date): string
+    {
+        if ($date === null || $date === '') {
+            return date('Y-m-d');
+        }
+
+        $trimmed = trim($date);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $trimmed)) {
+            throw new \InvalidArgumentException('Formato de fecha inválido');
+        }
+
+        $dateTime = \DateTimeImmutable::createFromFormat('Y-m-d', $trimmed);
+
+        if ($dateTime === false) {
+            throw new \InvalidArgumentException('Fecha inválida');
+        }
+
+        return $dateTime->format('Y-m-d');
+    }
+
+    /**
+     * @return iterable<int, string>
+     */
+    private function readLogLines(string $logFile): iterable
+    {
+        $file = new \SplFileObject($logFile, 'r');
+
+        while (!$file->eof()) {
+            $line = $file->fgets();
+
+            if ($line === false) {
+                break;
+            }
+
+            yield rtrim($line, "\r\n");
+        }
+    }
+
 }

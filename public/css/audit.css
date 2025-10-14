@@ -1,0 +1,396 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f5;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header,
+.section,
+.card,
+.stat-card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header,
+.section {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.header h1,
+.section h2 {
+    color: #333333;
+}
+
+.section h2 {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+}
+
+.text-muted {
+    color: #666666;
+}
+
+.filter-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    color: #666666;
+}
+
+.filter-form input {
+    padding: 8px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.filter-form button,
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.filter-form button,
+.btn-primary {
+    background: #007bff;
+    color: #ffffff;
+}
+
+.filter-form button:hover,
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn {
+    background: #28a745;
+    color: #ffffff;
+}
+
+.btn:hover {
+    background: #218838;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.card {
+    padding: 20px;
+}
+
+.card h3 {
+    color: #666666;
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.card .value,
+.stat-card .value {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333333;
+}
+
+.value-small {
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.value-danger {
+    color: #dc3545;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #666666;
+    border-bottom: 2px solid #dee2e6;
+}
+
+table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+table tr:hover {
+    background: #f8f9fa;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.empty {
+    text-align: center;
+    padding: 40px;
+    color: #999999;
+}
+
+.link-primary {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.link-primary:hover {
+    text-decoration: underline;
+}
+
+.text-ellipsis {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.breadcrumb {
+    color: #666666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    padding: 15px;
+}
+
+.stat-card h3 {
+    color: #666666;
+    font-size: 12px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #007bff;
+}
+
+.timeline-item.created::before {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.timeline-item.updated::before {
+    background: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.timeline-item.deleted::before {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.timeline-date {
+    font-size: 14px;
+    color: #666666;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+}
+
+.timeline-content.created {
+    border-left-color: #28a745;
+}
+
+.timeline-content.updated {
+    border-left-color: #17a2b8;
+}
+
+.timeline-content.deleted {
+    border-left-color: #dc3545;
+}
+
+.timeline-meta {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 10px;
+}
+
+.timeline-meta strong {
+    color: #333333;
+}
+
+.changes {
+    margin-top: 10px;
+}
+
+.change-item {
+    padding: 8px;
+    background: #ffffff;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.change-item.highlight {
+    background: #fff3cd;
+    border-left: 3px solid #ffc107;
+}
+
+.change-label {
+    color: #666666;
+    display: inline-block;
+    min-width: 120px;
+}
+
+.change-old {
+    color: #dc3545;
+    text-decoration: line-through;
+}
+
+.change-new {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.info-note {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666666;
+}
+
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

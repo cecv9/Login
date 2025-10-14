@@ -167,7 +167,7 @@ class AppSecurity
         header('X-Frame-Options: DENY');
         header('X-Content-Type-Options: nosniff');
         header('Referrer-Policy: no-referrer');
-        header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none';");
+        header("Content-Security-Policy: default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-ancestors 'none';");
         header('X-XSS-Protection: 1; mode=block');
         header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
 
@@ -206,7 +206,7 @@ class AppSecurity
             'path'     => '/',
             'secure'   => $secure,
             'httponly' => true,
-            'samesite' => 'Lax',
+            'samesite' => 'Strict',
         ];
 
         if ($domain !== '' && ($explicitDomainConfigured || strpos($domain, '.') !== false)) {
@@ -241,8 +241,9 @@ $container = DependencyContainer::getInstance();
 $container->bind(PdoConnection::class, fn() => $connection);
 
 // Bind Router con configuración completa
-$container->bind(Router::class, function() use ($connection) {
+$container->bind(Router::class, function($container) use ($connection) {
     $router = new Router($connection);
+    $router->setContainer($container);
 
     // Load routes
     $router->loadRoutes(__DIR__ . '/../app/Config/routes.php');
@@ -297,14 +298,13 @@ try {
         echo '<head>';
         echo '<meta charset="UTF-8">';
         echo '<title>Error 500 - Debug Mode</title>';
-        echo '<style>body { font-family: Arial, sans-serif; margin: 20px; }</style>';
         echo '</head>';
         echo '<body>';
         echo '<h1>❌ Error 500 - Internal Server Error</h1>';
         echo '<p><strong>Message:</strong> ' . htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>';
         echo '<p><strong>File:</strong> ' . htmlspecialchars($e->getFile(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . ':' . $e->getLine() . '</p>';
         echo '<details><summary><strong>Stack Trace:</strong></summary>';
-        echo '<pre style="background: #f5f5f5; padding: 10px; overflow: auto;">' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
+        echo '<pre>' . htmlspecialchars($e->getTraceAsString(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
         echo '</details>';
         echo '</body>';
         echo '</html>';
@@ -316,7 +316,6 @@ try {
         echo '<meta charset="UTF-8">';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
         echo '<title>Error del Servidor</title>';
-        echo '<style>body { font-family: system-ui, sans-serif; text-align: center; margin-top: 100px; }</style>';
         echo '</head>';
         echo '<body>';
         echo '<h1>🤕 Lo sentimos, algo salió mal.</h1>';
